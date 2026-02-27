@@ -1,0 +1,36 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18.x'
+          registry-url: 'https://registry.npmjs.org'
+      - name: Install deps
+        run: |
+          cd StandaloneChat
+          npm ci
+      - name: Build
+        run: |
+          cd StandaloneChat
+          npm run build
+      - name: Test
+        run: |
+          cd StandaloneChat
+          npm test -- --ci
+      - name: Publish
+        run: |
+          cd StandaloneChat
+          npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

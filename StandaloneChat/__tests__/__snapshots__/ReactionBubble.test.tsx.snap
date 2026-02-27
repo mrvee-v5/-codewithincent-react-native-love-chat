@@ -1,0 +1,19 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ReactionBubble positioning visual style snapshot 1`] = `
+{
+  "emojiPanel": {
+    "height": 60,
+    "left": 21,
+    "top": 138,
+    "width": 288,
+  },
+  "menu": {
+    "above": false,
+    "height": 144,
+    "left": 90,
+    "top": 262,
+    "width": 200,
+  },
+}
+`;
