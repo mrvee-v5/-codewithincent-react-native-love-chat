@@ -1,6 +1,8 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { View, StyleSheet, Text, Alert, TouchableOpacity } from 'react-native';
 import { Chat, IMessage } from './index';
+import VideoCard from '../ChatScreen/media/VideoCard';
+import AudioCard from '../ChatScreen/media/AudioCard';
 
 const Demo = () => {
   const [messages, setMessages] = useState<IMessage[]>([]);
@@ -28,7 +30,7 @@ const Demo = () => {
           flexDirection: 'row',
           padding: 10,
           justifyContent: 'space-around',
-          backgroundColor: '#f0f0f0',
+          backgroundColor: '#ffffff',
         }}>
         {uploadOptions.map((option) => (
           <TouchableOpacity
@@ -320,6 +322,7 @@ const Demo = () => {
           createdAt: new Date(),
           user: user,
           image: 'https://picsum.photos/300/200',
+          fileType: 'image',
         };
         onSend([imageMessage]);
         break;
@@ -330,6 +333,7 @@ const Demo = () => {
           createdAt: new Date(),
           user: user,
           video: 'https://www.w3schools.com/html/mov_bbb.mp4',
+          fileType: 'video',
         };
         onSend([videoMessage]);
         break;
@@ -340,6 +344,7 @@ const Demo = () => {
           createdAt: new Date(),
           user: user,
           audio: 'https://samplelib.com/lib/preview/mp3/sample-15s.mp3',
+          fileType: 'audio',
         };
         onSend([audioMessage]);
         break;
@@ -463,6 +468,17 @@ const Demo = () => {
         }
       : {};
 
+  const renderVideo = (p) => {
+    console.log('PPPPPPP =>', p);
+    return (
+      <VideoCard
+        file={{ uri: p.video }}
+        setFullScreen={p.setFullScreen}
+        isFullScreen={p.isFullScreen}
+      />
+    );
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.topBar}>
@@ -485,6 +501,11 @@ const Demo = () => {
         renderUploadFooter={renderCustomUploadFooter}
         onDeleteMessage={handleDeleteMessage}
         onDownloadFile={handleDownloadFile}
+        renderMessageVideo={renderVideo}
+        renderMessageAudio={(p) => {
+          console.log('PPPPPPP =>', JSON.stringify(p, null, 6));
+          return <AudioCard uri={p.audio} />;
+        }}
         theme={demoTheme}
       />
     </View>

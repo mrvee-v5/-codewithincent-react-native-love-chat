@@ -158,7 +158,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     marginLeft: 10,
     overflow: 'hidden',
-    backgroundColor: '#ccc',
+    backgroundColor: defaultTheme.colors.mediaThumbBg,
     justifyContent: 'center',
     alignItems: 'center',
   },

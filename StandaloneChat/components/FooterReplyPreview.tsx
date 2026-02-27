@@ -11,7 +11,6 @@ interface FooterReplyPreviewProps {
 }
 
 const FooterReplyPreview = ({ chatMessage, clearReply, userId }: FooterReplyPreviewProps) => {
-  console.log('chatMessage', chatMessage);
   const theme = useTheme();
   if (!chatMessage) return null;
 
@@ -152,7 +151,7 @@ const styles = StyleSheet.create({
     borderLeftWidth: 4,
     borderLeftColor: defaultTheme.colors.primary,
     borderBottomWidth: 0.3,
-    borderBottomColor: '#ddd',
+    borderBottomColor: defaultTheme.colors.replyPreviewBorder,
   },
   replyLine: {
     width: 4,
@@ -186,7 +185,7 @@ const styles = StyleSheet.create({
     height: 40,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#eee',
+    backgroundColor: defaultTheme.colors.replyMediaBg,
     borderRadius: 4,
   },
   replyFileContainer: {

@@ -11,6 +11,7 @@ import {
 import { appSize } from '../../utils';
 import { CloseIcon } from '../Icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { defaultTheme, useTheme } from '../../utils/theme';
 
 interface ImageCardProps {
   uri: string;
@@ -33,6 +34,7 @@ export default function ImageCard({
   setFullScreen,
 }: ImageCardProps) {
   const inset = useSafeAreaInsets();
+  const theme = useTheme();
   const bubbleWidth = maxWidth || appSize.width(65);
 
   const [bubbleHeight, setBubbleHeight] = useState(
@@ -97,7 +99,7 @@ export default function ImageCard({
             ]}
             onPress={() => setFullScreen(false)}
           >
-            <CloseIcon size={24} color="#fff" />
+            <CloseIcon size={24} color={theme.colors.white} />
           </TouchableOpacity>
         </View>
       </Modal>
@@ -109,7 +111,7 @@ const styles = StyleSheet.create({
   container: {
     borderRadius: appSize.width(2),
     overflow: 'hidden',
-    backgroundColor: '#000',
+    backgroundColor: defaultTheme.colors.black,
     margin: -2,
   },
   image: {
@@ -120,7 +122,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#000',
+    backgroundColor: defaultTheme.colors.black,
   },
   fullScreenImage: {
     width: SCREEN_WIDTH,
@@ -136,13 +138,13 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 5,
     right: 5,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: defaultTheme.colors.overlayBlack50,
     borderRadius: 10,
     paddingHorizontal: 6,
     paddingVertical: 2,
   },
   timeText: {
-    color: '#fff',
+    color: defaultTheme.colors.white,
     fontSize: 10,
     fontWeight: '600',
   },

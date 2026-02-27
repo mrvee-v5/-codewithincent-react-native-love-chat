@@ -1,8 +1,8 @@
 import React from 'react';
 import { View, StyleSheet, Text } from 'react-native';
 import { appSize } from '../../utils';
-import {  useTheme } from '../../utils/theme';
-import { FileIcon} from '../Icons';
+import { useTheme } from '../../utils/theme';
+import { FileIcon } from '../Icons';
 
 interface FileCardProps {
   fileName: string;
@@ -11,20 +11,16 @@ interface FileCardProps {
   time?: string;
 }
 
-export default function FileCard({
-  fileName,
-  isMine = false,
-  time,
-}: FileCardProps) {
+export default function FileCard({ fileName, isMine = false, time }: FileCardProps) {
   const theme = useTheme();
-  
+
   // WhatsApp-style colors
   // Sent: Lighter green bubble, file card is slightly darker green/transparent
   // Received: White bubble, file card is light gray
-  
+
   const cardBackgroundColor = isMine ? theme.colors.ownFileBg : theme.colors.otherFileBg;
   const textColor = isMine ? theme.colors.ownMessageText : theme.colors.otherMessageText;
-  const subTextColor = isMine ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.5)';
+  const subTextColor = isMine ? theme.colors.timestampMine : theme.colors.mediumGray;
   const iconColor = isMine ? theme.colors.white : theme.colors.darkRed;
 
   const getExtension = (name: string) => {
@@ -32,31 +28,28 @@ export default function FileCard({
   };
 
   const extension = getExtension(fileName);
-  
+
   return (
     <View style={styles.container}>
       <View style={[styles.card, { backgroundColor: cardBackgroundColor }]}>
         <View style={styles.iconContainer}>
-            <FileIcon size={24} color={iconColor} />
-            <Text style={[styles.extensionText, { color: iconColor }]}>{extension}</Text>
+          <FileIcon size={24} color={iconColor} />
+          <Text style={[styles.extensionText, { color: iconColor }]}>{extension}</Text>
         </View>
         <View style={styles.infoContainer}>
-            <Text 
-                style={[styles.fileName, { color: textColor }]} 
-                numberOfLines={1} 
-                ellipsizeMode="middle"
-            >
-                {fileName}
-            </Text>
-            <Text style={[styles.fileSize, { color: subTextColor }]}>
-                1.2 MB • {extension}
-            </Text>
+          <Text
+            style={[styles.fileName, { color: textColor }]}
+            numberOfLines={1}
+            ellipsizeMode="middle">
+            {fileName}
+          </Text>
+          <Text style={[styles.fileSize, { color: subTextColor }]}>1.2 MB • {extension}</Text>
         </View>
       </View>
-      
+
       {/* Footer with timestamp */}
       <View style={styles.footer}>
-         <Text style={[styles.timeText, { color: subTextColor }]}>{time}</Text>
+        <Text style={[styles.timeText, { color: subTextColor }]}>{time}</Text>
       </View>
     </View>
   );
@@ -97,12 +90,12 @@ const styles = StyleSheet.create({
     fontSize: 11,
   },
   footer: {
-      flexDirection: 'row',
-      justifyContent: 'flex-end',
-      paddingRight: 4,
-      paddingBottom: 2,
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    paddingRight: 4,
+    paddingBottom: 2,
   },
   timeText: {
-      fontSize: 10,
-  }
+    fontSize: 10,
+  },
 });

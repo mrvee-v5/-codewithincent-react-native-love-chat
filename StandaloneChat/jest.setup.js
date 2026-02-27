@@ -1,13 +1,15 @@
 jest.mock('react-native-reanimated', () => {
   const React = require('react');
   const RN = require('react-native');
+  const AnimatedMock = {
+    createAnimatedComponent: (Comp) => Comp,
+  };
   return {
-    default: {},
+    default: AnimatedMock,
     View: RN.View,
     ScrollView: RN.ScrollView,
     Image: RN.Image,
     Text: RN.Text,
-    // animations
     FadeIn: { build: () => ({}) },
     FadeOut: { build: () => ({}) },
     ZoomIn: { build: () => ({}) },

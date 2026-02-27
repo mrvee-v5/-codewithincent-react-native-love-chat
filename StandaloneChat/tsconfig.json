@@ -20,11 +20,5 @@
     "utils/**/*.ts",
     "utils/**/*.tsx"
   ],
-  "exclude": [
-    "Demo.tsx",
-    "__tests__",
-    "components/__tests__",
-    "dist",
-    "node_modules"
-  ]
+  "exclude": ["Demo.tsx", "__tests__", "components/__tests__", "dist", "node_modules"]
 }

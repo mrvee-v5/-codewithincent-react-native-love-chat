@@ -802,11 +802,6 @@
     "@babel/helper-string-parser" "^7.27.1"
     "@babel/helper-validator-identifier" "^7.28.5"
 
-"@codewithvincent/react-native-love-chat@^0.1.0":
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/@codewithvincent/react-native-love-chat/-/react-native-love-chat-0.1.0.tgz#c3ab03d150b00e3fc5a2e2144661ab8deed09cdc"
-  integrity sha512-g9+vxch2AulEbQp4oIDc890c+FJD5PdnaCoWFhy+o26ixFC7puCOVxDpqRnD1WFjoRZnq1IkLUelInBi5X0MZw==
-
 "@egjs/hammerjs@^2.0.17":
   version "2.0.17"
   resolved "https://registry.yarnpkg.com/@egjs/hammerjs/-/hammerjs-2.0.17.tgz#5dc02af75a6a06e4c2db0202cae38c9263895124"
@@ -2818,6 +2813,16 @@ expo-asset@~11.0.5:
     invariant "^2.2.4"
     md5-file "^3.2.3"
 
+expo-audio@^55.0.8:
+  version "55.0.8"
+  resolved "https://registry.yarnpkg.com/expo-audio/-/expo-audio-55.0.8.tgz#a8c487b407a1f8a457c83340977ec793a6a0d353"
+  integrity sha512-X61pQSikE2rsP2ZTMFUMThOmgGyYEHcmZpGVMrKJgcYtRCFKuctB/z69dFQPoumL+zTz8qlBoGohjkHVvA9P8A==
+
+expo-av@~15.0.2:
+  version "15.0.2"
+  resolved "https://registry.yarnpkg.com/expo-av/-/expo-av-15.0.2.tgz#65bb08658a7fe3a67aa47da614abbfae9adb684e"
+  integrity sha512-AHIHXdqLgK1dfHZF0JzX3YSVySGMrWn9QtPzaVjw54FAzvXfMt4sIoq4qRL/9XWCP9+ICcCs/u3EcvmxQjrfcA==
+
 expo-blur@~14.0.3:
   version "14.0.3"
   resolved "https://registry.yarnpkg.com/expo-blur/-/expo-blur-14.0.3.tgz#656d6b2442bfbbfb2a6608c6bc1151b29bce6698"
@@ -2875,6 +2880,11 @@ expo-status-bar@~2.0.1:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/expo-status-bar/-/expo-status-bar-2.0.1.tgz#fc07726346dc30fbb68aadb0d7890b34fba42eee"
   integrity sha512-AkIPX7jWHRPp83UBZ1iXtVvyr0g+DgBVvIXTtlmPtmUsm8Vq9Bb5IGj86PW8osuFlgoTVAg7HI/+Ok7yEYwiRg==
+
+expo-video@^55.0.10:
+  version "55.0.10"
+  resolved "https://registry.yarnpkg.com/expo-video/-/expo-video-55.0.10.tgz#bcfbbefee82753d814afbd64c6c387afc8f53050"
+  integrity sha512-L3UXgvGjrJv4ym3PnIGPPQi4LlVHQSh89eYm2Q7Pn9iUy5ce98sAdqPIKV88bfdLAIWfmPecYUoOzozXBPmenw==
 
 expo@^52.0.0:
   version "52.0.49"

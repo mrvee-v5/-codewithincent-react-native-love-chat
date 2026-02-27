@@ -1,5 +1,13 @@
 import React, { useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, Pressable, UIManager, findNodeHandle, Dimensions } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Pressable,
+  UIManager,
+  findNodeHandle,
+  Dimensions,
+} from 'react-native';
 import Animated, {
   ZoomIn,
   ZoomOut,
@@ -15,8 +23,7 @@ import { ReplyIcon, TrashIcon, DownloadIcon } from './Icons';
 
 const SCREEN = Dimensions.get('window');
 
-const clamp = (value: number, min: number, max: number) =>
-  Math.min(Math.max(value, min), max);
+const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
 
 // Helper exported for tests (non-breaking)
 export const computePositions = ({
@@ -25,7 +32,6 @@ export const computePositions = ({
   isMine,
   screenW,
   screenH,
-  popupItemWidth = 42,
   popupHeight = 60,
   menuWidth = 200,
   menuItemCount = 3,
@@ -54,8 +60,7 @@ export const computePositions = ({
 }) => {
   // More accurate width estimation: per-reaction width + container paddings
   const perReactionWidth = reactionCoreWidth + reactionHorizontalPadding * 2;
-  const emojiPanelWidth =
-    reactionsCount * perReactionWidth + popupHorizontalPadding * 2;
+  const emojiPanelWidth = reactionsCount * perReactionWidth + popupHorizontalPadding * 2;
 
   let left = pos.x + pos.width / 2 - emojiPanelWidth / 2;
   if (isMine) {
@@ -107,7 +112,7 @@ export type ReactionBubbleProps = {
   children: React.ReactNode;
   onPress?: () => void;
   onLongPress?: () => void;
-  
+
   // Context Menu Props
   onReply?: () => void;
   onDelete?: () => void;
@@ -151,17 +156,13 @@ export default function ReactionBubble({
     ],
   }));
 
-  const showPopup = (pos: {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-  }) => {
+  const showPopup = (pos: { x: number; y: number; width: number; height: number }) => {
     hidePopup();
     scale.value = 0;
 
     // Feature-detection gate: only use robust positioning when Dimensions exists and measureInWindow is available
-    const canMeasure = typeof UIManager.measureInWindow === 'function' && SCREEN && typeof SCREEN.width === 'number';
+    const canMeasure =
+      typeof UIManager.measureInWindow === 'function' && SCREEN && typeof SCREEN.width === 'number';
 
     let left: number;
     let top: number;
@@ -193,100 +194,112 @@ export default function ReactionBubble({
       menuTop = positions.menu.top;
     } else {
       // Fallback to previous behavior (unchanged)
-      const popupWidth = reactions.length * 42; 
+      const popupWidth = reactions.length * 42;
       const popupHeight = 60;
       const screenW = SCREEN.width;
-      top = pos.y - popupHeight - 12; 
+      top = pos.y - popupHeight - 12;
       left = pos.x + pos.width / 2 - popupWidth / 2;
       if (isMine) {
         left = pos.x + pos.width - popupWidth - appSize.width(6.5);
       }
       left = clamp(left, 10, screenW - popupWidth - 10);
       menuTop = pos.y + pos.height + 10;
-      let _menuLeft = isMine ? (pos.x + pos.width - menuWidth) : pos.x;
+      let _menuLeft = isMine ? pos.x + pos.width - menuWidth : pos.x;
       menuLeft = clamp(_menuLeft, 10, screenW - menuWidth - 10);
     }
 
     siblingRef.current = new RootSibling(
-      (
-        <View style={styles.overlayContainer}>
-          <Pressable style={StyleSheet.absoluteFill} onPress={hidePopup}>
-            <UniversalBlurView
-              style={StyleSheet.absoluteFill}
-              blurType={'dark'}
-              blurAmount={12}
-              tint="dark"
-              intensity={60}
-              reducedTransparencyFallbackColor="#000000CC"
-            />
-          </Pressable>
+      <View style={styles.overlayContainer}>
+        <Pressable style={StyleSheet.absoluteFill} onPress={hidePopup}>
+          <UniversalBlurView
+            style={StyleSheet.absoluteFill}
+            blurType={'dark'}
+            blurAmount={12}
+            tint="dark"
+            intensity={60}
+            reducedTransparencyFallbackColor={theme.colors.blurFallback}
+          />
+        </Pressable>
 
-          <View
-            style={[
-              styles.messageDuplicateWrapper,
-              {
-                top: pos.y,
-                left: pos.x,
-                width: pos.width,
-              },
-            ]}>
-            {children}
-          </View>
-
-          {/* Reaction Bar */}
-          <Animated.View
-            entering={ZoomIn.duration(100)}
-            exiting={ZoomOut.duration(100)}
-            style={{
-              position: 'absolute',
-              top,
-              left,
-            }}>
-            <Animated.View style={[styles.popup, bubbleStyle, animStyle]}>
-              {reactions.map((r, i) => (
-                <Pressable key={i} onPress={() => handleReactionPress(r)}>
-                  <Text style={[styles.reaction, reactionStyle]}>{r}</Text>
-                </Pressable>
-              ))}
-            </Animated.View>
-          </Animated.View>
-
-          {/* Context Menu */}
-          <Animated.View
-             entering={ZoomIn.duration(150).delay(50)}
-             exiting={ZoomOut.duration(150)}
-             style={[
-                 styles.contextMenu,
-                 {
-                     top: menuTop,
-                     left: menuLeft,
-                     width: menuWidth,
-                 }
-             ]}
-          >
-             {onReply && (
-                 <Pressable style={styles.menuItem} onPress={() => { hidePopup(); onReply(); }}>
-                     <Text style={styles.menuText}>Reply</Text>
-                     <ReplyIcon size={18} color="#fff" />
-                 </Pressable>
-             )}
-             
-             {isFile && onDownload && (
-                 <Pressable style={styles.menuItem} onPress={() => { hidePopup(); onDownload(); }}>
-                     <Text style={styles.menuText}>Download</Text>
-                     <DownloadIcon size={18} color="#fff" />
-                 </Pressable>
-             )}
-
-             {onDelete && (
-                 <Pressable style={[styles.menuItem, { borderBottomWidth: 0 }]} onPress={() => { hidePopup(); onDelete(); }}>
-                     <Text style={[styles.menuText, { color: defaultTheme.colors.darkRed }]}>Delete</Text>
-                     <TrashIcon size={18} />
-                 </Pressable>
-             )}
-          </Animated.View>
+        <View
+          style={[
+            styles.messageDuplicateWrapper,
+            {
+              top: pos.y,
+              left: pos.x,
+              width: pos.width,
+            },
+          ]}>
+          {children}
         </View>
-      ),
+
+        {/* Reaction Bar */}
+        <Animated.View
+          entering={ZoomIn.duration(100)}
+          exiting={ZoomOut.duration(100)}
+          style={{
+            position: 'absolute',
+            top,
+            left,
+          }}>
+          <Animated.View style={[styles.popup, bubbleStyle, animStyle]}>
+            {reactions.map((r, i) => (
+              <Pressable key={i} onPress={() => handleReactionPress(r)}>
+                <Text style={[styles.reaction, reactionStyle]}>{r}</Text>
+              </Pressable>
+            ))}
+          </Animated.View>
+        </Animated.View>
+
+        {/* Context Menu */}
+        <Animated.View
+          entering={ZoomIn.duration(150).delay(50)}
+          exiting={ZoomOut.duration(150)}
+          style={[
+            styles.contextMenu,
+            {
+              top: menuTop,
+              left: menuLeft,
+              width: menuWidth,
+            },
+          ]}>
+          {onReply && (
+            <Pressable
+              style={styles.menuItem}
+              onPress={() => {
+                hidePopup();
+                onReply();
+              }}>
+              <Text style={styles.menuText}>Reply</Text>
+              <ReplyIcon size={18} color={theme.colors.white} />
+            </Pressable>
+          )}
+
+          {isFile && onDownload && (
+            <Pressable
+              style={styles.menuItem}
+              onPress={() => {
+                hidePopup();
+                onDownload();
+              }}>
+              <Text style={styles.menuText}>Download</Text>
+              <DownloadIcon size={18} color={theme.colors.white} />
+            </Pressable>
+          )}
+
+          {onDelete && (
+            <Pressable
+              style={[styles.menuItem, { borderBottomWidth: 0 }]}
+              onPress={() => {
+                hidePopup();
+                onDelete();
+              }}>
+              <Text style={[styles.menuText, { color: defaultTheme.colors.darkRed }]}>Delete</Text>
+              <TrashIcon size={18} />
+            </Pressable>
+          )}
+        </Animated.View>
+      </View>
     );
 
     requestAnimationFrame(() => {
@@ -308,9 +321,9 @@ export default function ReactionBubble({
     UIManager.measureInWindow(node, (x, y, width, height) => {
       showPopup({ x, y, width, height });
     });
-    
+
     if (onLongPress) {
-        onLongPress();
+      onLongPress();
     }
   };
 
@@ -364,7 +377,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 12,
     borderRadius: 40,
-    backgroundColor: '#202A30',
+    backgroundColor: defaultTheme.colors.reactionPopupBg,
     zIndex: 100,
   },
   reaction: {
@@ -384,7 +397,7 @@ const styles = StyleSheet.create({
   },
   contextMenu: {
     position: 'absolute',
-    backgroundColor: 'rgba(30, 30, 30, 0.95)',
+    backgroundColor: defaultTheme.colors.reactionMenuBg,
     borderRadius: 12,
     paddingVertical: 4,
     width: 200,
@@ -397,10 +410,10 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    borderBottomColor: defaultTheme.colors.reactionMenuSeparator,
   },
   menuText: {
-    color: '#fff',
+    color: defaultTheme.colors.white,
     fontSize: 16,
     fontWeight: '400',
   },

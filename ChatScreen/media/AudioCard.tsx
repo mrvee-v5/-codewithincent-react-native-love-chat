@@ -7,10 +7,10 @@ import {
   Text,
   ActivityIndicator,
 } from 'react-native';
-import { appSize, Logger } from '../../utils';
-import { defaultTheme, useTheme } from '../../utils/theme';
-import { PlayIcon, PauseIcon } from '../Icons';
-import { AudioEngine } from '../adapters/UniversalAudio';
+import { appSize, Logger } from '../../StandaloneChat/utils';
+import { defaultTheme, useTheme } from '../../StandaloneChat/utils/theme';
+import { PlayIcon, PauseIcon } from '../../StandaloneChat/components/Icons';
+import { Audio, AVPlaybackStatus, AVPlaybackStatusSuccess } from 'expo-av';
 
 interface AudioMessageProps {
   uri: string;
@@ -19,14 +19,14 @@ interface AudioMessageProps {
 }
 
 export default function AudioCard({ uri, maxWidth, isMine }: AudioMessageProps) {
-  const soundRef = useRef<any>(null);
-  const intervalRef = useRef<any>(null);
+  const soundRef = useRef<Audio.Sound | null>(null);
   const progressAnim = useRef(new Animated.Value(0)).current;
-  const totalDuration = useRef<number>(0);
+  const intervalRef = useRef<number | null>(null);
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [currentTime, setCurrentTime] = useState('0:00');
+  const [duration, setDuration] = useState(0);
 
   const theme = useTheme();
 
@@ -37,15 +37,16 @@ export default function AudioCard({ uri, maxWidth, isMine }: AudioMessageProps) 
   }, []);
 
   const cleanup = async () => {
-    if (AudioEngine.type === 'expo-audio' && soundRef.current) {
-      await soundRef.current?.stop?.();
+    if (soundRef.current) {
+      try {
+        await soundRef.current.stopAsync();
+        await soundRef.current.unloadAsync();
+      } catch (e) {
+        Logger.error('Error unloading audio', e);
+      }
+      soundRef.current = null;
     }
-
-    if (AudioEngine.type === 'rnsound' && soundRef.current) {
-      soundRef.current.release();
-    }
-
-    if (intervalRef.current) clearInterval(intervalRef.current);
+    if (intervalRef.current !== null) clearInterval(intervalRef.current);
   };
 
   const formatTime = (sec: number) => {
@@ -58,126 +59,84 @@ export default function AudioCard({ uri, maxWidth, isMine }: AudioMessageProps) 
     setIsPlaying(false);
     progressAnim.setValue(0);
     setCurrentTime('0:00');
-    if (intervalRef.current) clearInterval(intervalRef.current);
+    if (intervalRef.current !== null) clearInterval(intervalRef.current);
   };
 
   const play = async () => {
     if (!uri) return;
 
-    // 🔵 EXPO-AUDIO MODE
-    if (AudioEngine.type === 'expo-audio') {
-      try {
-        setIsLoading(true);
-
-        const { createAudioPlayer } = AudioEngine.ExpoAudio;
-        const player = createAudioPlayer({ uri });
-
-        soundRef.current = player;
-
-        player.play();
-        setIsPlaying(true);
-        setIsLoading(false);
-
-        totalDuration.current = player.duration ?? 0;
-
-        intervalRef.current = setInterval(() => {
-          const pos = player.currentTime ?? 0;
-
-          if (totalDuration.current > 0) {
-            progressAnim.setValue(pos / totalDuration.current);
-          }
-
-          setCurrentTime(formatTime(pos));
-
-          if (player.didJustFinish) {
-            onFinish();
-          }
-        }, 200);
-      } catch (e) {
-        Logger.error('expo-audio error', e);
-        setIsLoading(false);
-      }
-      return;
-    }
-
-    // 🟠 RN SOUND MODE
-    if (AudioEngine.type === 'rnsound') {
-      const Sound = AudioEngine.RNSound;
+    try {
+      setIsLoading(true);
 
       if (!soundRef.current) {
-        setIsLoading(true);
+        const { sound, status } = await Audio.Sound.createAsync({ uri }, { shouldPlay: true });
+        soundRef.current = sound;
 
-        const sound = new Sound(uri, '', (err: any) => {
-          setIsLoading(false);
-          if (err) {
-            Logger.error('RN Sound error', err);
-            return;
-          }
-
-          soundRef.current = sound;
-          totalDuration.current = sound.getDuration();
-
-          sound.play(onFinish);
-          setIsPlaying(true);
-
-          intervalRef.current = setInterval(() => {
-            sound.getCurrentTime((sec: number) => {
-              if (totalDuration.current > 0) {
-                progressAnim.setValue(sec / totalDuration.current);
-              }
-              setCurrentTime(formatTime(sec));
-            });
-          }, 200);
-        });
-
-        return;
+        const dur =
+          'isLoaded' in status &&
+          status.isLoaded &&
+          typeof (status as AVPlaybackStatusSuccess).durationMillis === 'number'
+            ? ((status as AVPlaybackStatusSuccess).durationMillis as number) / 1000
+            : 0;
+        setDuration(dur);
+      } else {
+        await soundRef.current.playAsync();
       }
 
-      soundRef.current.play(onFinish);
       setIsPlaying(true);
-      return;
-    }
+      setIsLoading(false);
 
-    Logger.error('No audio engine available.');
+      intervalRef.current = setInterval(async () => {
+        if (!soundRef.current) return;
+        const status: AVPlaybackStatus = await soundRef.current.getStatusAsync();
+        if (!('isLoaded' in status) || !status.isLoaded) return;
+
+        const s = status as AVPlaybackStatusSuccess;
+        const pos = (s.positionMillis ?? 0) / 1000;
+        const dur = (s.durationMillis ?? 0) / 1000;
+
+        setCurrentTime(formatTime(pos));
+        if (dur > 0) progressAnim.setValue(pos / dur);
+
+        if (s.didJustFinish) {
+          onFinish();
+        }
+      }, 200) as unknown as number;
+    } catch (e) {
+      Logger.error('expo-audio error', e);
+      setIsLoading(false);
+    }
   };
 
   const pause = async () => {
     if (!soundRef.current) return;
-
-    if (AudioEngine.type === 'expo-audio') {
-      soundRef.current.pause?.();
+    try {
+      await soundRef.current.pauseAsync();
+      setIsPlaying(false);
+      if (intervalRef.current !== null) clearInterval(intervalRef.current);
+    } catch (e) {
+      Logger.error('Error pausing audio', e);
     }
-
-    if (AudioEngine.type === 'rnsound') {
-      soundRef.current.pause();
-    }
-
-    setIsPlaying(false);
-    if (intervalRef.current) clearInterval(intervalRef.current);
   };
 
   const progressWidth = progressAnim.interpolate({
     inputRange: [0, 1],
     outputRange: ['0%', '100%'],
   });
-const cardBackgroundColor = isMine ? theme.colors.ownFileBg : theme.colors.otherFileBg;
-const textColor = isMine ? theme.colors.ownMessageText : theme.colors.otherMessageText;
+
+  const cardBackgroundColor = isMine ? theme.colors.ownFileBg : theme.colors.otherFileBg;
+  const textColor = isMine ? theme.colors.ownMessageText : theme.colors.otherMessageText;
 
   return (
     <View
       style={[
         styles.container,
-        {
-          maxWidth: maxWidth || appSize.width(60),
-          backgroundColor: cardBackgroundColor
-        },
-      ]}
-    >
+        { maxWidth: maxWidth || appSize.width(60), backgroundColor: cardBackgroundColor },
+      ]}>
       <TouchableOpacity
         style={[styles.playButton, { backgroundColor: theme.colors.darkRed }]}
         onPress={isPlaying ? pause : play}
-        disabled={isLoading}
-      >
+        disabled={isLoading}>
         {isLoading ? (
           <ActivityIndicator size="small" color="#fff" />
         ) : isPlaying ? (
