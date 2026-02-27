@@ -802,6 +802,11 @@
     "@babel/helper-string-parser" "^7.27.1"
     "@babel/helper-validator-identifier" "^7.28.5"
 
+"@codewithvincent/react-native-love-chat@^0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@codewithvincent/react-native-love-chat/-/react-native-love-chat-0.1.0.tgz#c3ab03d150b00e3fc5a2e2144661ab8deed09cdc"
+  integrity sha512-g9+vxch2AulEbQp4oIDc890c+FJD5PdnaCoWFhy+o26ixFC7puCOVxDpqRnD1WFjoRZnq1IkLUelInBi5X0MZw==
+
 "@egjs/hammerjs@^2.0.17":
   version "2.0.17"
   resolved "https://registry.yarnpkg.com/@egjs/hammerjs/-/hammerjs-2.0.17.tgz#5dc02af75a6a06e4c2db0202cae38c9263895124"

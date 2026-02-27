@@ -11,6 +11,7 @@
     "test": "jest"
   },
   "dependencies": {
+    "@codewithvincent/react-native-love-chat": "^0.1.0",
     "@react-native-community/blur": "^4.4.1",
     "@shopify/flash-list": "1.7.3",
     "expo": "^52.0.0",
