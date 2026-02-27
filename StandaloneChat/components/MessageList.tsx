@@ -1,5 +1,12 @@
 import React, { useCallback, useMemo, useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ActivityIndicator,
+  InteractionManager,
+} from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { IMessage, ChatProps } from '../types';
 import Message from './Message';
@@ -28,9 +35,12 @@ const MessageList = (props: MessageListProps) => {
       // Scenario 1: Initial mount - scroll to bottom immediately
       isMounted.current = true;
       // Use a small timeout to ensure list is ready
-      setTimeout(() => {
-        listRef.current?.scrollToEnd({ animated: false });
-      }, 0);
+      const task = InteractionManager.runAfterInteractions(() => {
+        setTimeout(() => {
+          listRef.current?.scrollToEnd({ animated: false });
+        }, 0);
+      });
+      return () => task.cancel();
     } else {
       // Scenario 2: New message added - smooth scroll to bottom
       // We can also check if we are already at the bottom to avoid annoyance,
@@ -111,9 +121,9 @@ const MessageList = (props: MessageListProps) => {
       ListHeaderComponent={renderHeader}
       keyboardShouldPersistTaps={props.keyboardShouldPersistTaps}
       maintainVisibleContentPosition={{
-        autoscrollToBottomThreshold: 0.2,
-        animateAutoScrollToBottom: true,
-        startRenderingFromBottom: true,
+        autoscrollToBottomThreshold: 0, // start from the bottom immediately
+        animateAutoScrollToBottom: false, // no noticeable animation
+        startRenderingFromBottom: true, // renders from bottom
       }}
       onStartReached={loadEarlier ? onLoadEarlier : undefined}
       onStartReachedThreshold={0.1}

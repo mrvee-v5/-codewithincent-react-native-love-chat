@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, KeyboardAvoidingView, Platform, SafeAreaView } from 'react-native';
+import { View, StyleSheet, KeyboardAvoidingView, Platform, SafeAreaView, UIManager, findNodeHandle } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ChatProps, IMessage } from './types';
 import MessageList from './components/MessageList';
 import InputToolbar from './components/InputToolbar';
@@ -7,6 +8,9 @@ import { defaultTheme, ThemeProvider, useTheme } from './utils/theme';
 
 const InnerChat = (props: ChatProps) => {
   const theme = useTheme();
+  const insets = useSafeAreaInsets();
+  const [containerTopOffset, setContainerTopOffset] = useState(0);
+  const containerRef = React.useRef<SafeAreaView | null>(null);
   const {
     messages = [],
     text: propText,
@@ -20,8 +24,6 @@ const InnerChat = (props: ChatProps) => {
     onReply,
     onClearReply,
     renderUploadFooter,
-    onDeleteMessage,
-    onDownloadFile,
   } = props;
 
   const [text, setText] = useState(propText || '');
@@ -84,11 +86,24 @@ const InnerChat = (props: ChatProps) => {
   };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.white }, containerStyle]}>
+    <SafeAreaView
+      ref={containerRef}
+      style={[styles.container, { backgroundColor: theme.colors.white }, containerStyle]}
+      onLayout={() => {
+        const node = findNodeHandle(containerRef.current as unknown as any);
+        if (node) {
+          UIManager.measureInWindow(node, (_x, y) => {
+            if (typeof y === 'number') {
+              setContainerTopOffset(Math.max(0, Math.round(y)));
+            }
+          });
+        }
+      }}
+    >
       <KeyboardAvoidingView
         style={styles.keyboardAvoidingView}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0} 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? insets.top + containerTopOffset : 0}
       >
         <View style={styles.contentContainer}>
           <MessageList
@@ -122,7 +137,6 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     flex: 1,
-    overflow: 'hidden',
   },
 });
 

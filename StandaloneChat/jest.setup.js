@@ -34,3 +34,17 @@ jest.mock('react-native-root-siblings', () => {
     return null;
   };
 });
+
+// Polyfill setImmediate for React Native InteractionManager in Jest
+if (typeof global.setImmediate === 'undefined') {
+  global.setImmediate = (fn, ...args) => setTimeout(fn, 0, ...args);
+}
+// Make InteractionManager.runAfterInteractions work in tests
+const { InteractionManager } = require('react-native');
+if (InteractionManager && typeof InteractionManager.runAfterInteractions === 'function') {
+  const originalRunAfterInteractions = InteractionManager.runAfterInteractions;
+  InteractionManager.runAfterInteractions = (cb) => {
+    const id = setTimeout(cb, 0);
+    return { cancel: () => clearTimeout(id) };
+  };
+}
