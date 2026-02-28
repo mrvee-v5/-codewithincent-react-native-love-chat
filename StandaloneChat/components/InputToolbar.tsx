@@ -19,6 +19,12 @@ interface InputToolbarProps {
   replyMessage?: IMessage | null;
   onClearReply?: () => void;
   renderUploadFooter?: (props: any) => React.ReactNode;
+  renderAttachmentButton?: (props: {
+    toggle: () => void;
+    showing: boolean;
+    onPressAttachment?: (type: string) => void;
+    theme: any;
+  }) => React.ReactNode;
 }
 
 const InputToolbar = (props: InputToolbarProps) => {
@@ -33,6 +39,7 @@ const InputToolbar = (props: InputToolbarProps) => {
     replyMessage,
     onClearReply,
     renderUploadFooter,
+    renderAttachmentButton,
     ...rest 
   } = props;
 
@@ -107,9 +114,18 @@ const InputToolbar = (props: InputToolbarProps) => {
       )}
       
       <View style={[styles.container, { borderTopColor: theme.colors.borderGray, backgroundColor: theme.colors.white }]}>
-        <Pressable onPress={toggleUploadFooter} style={styles.addButton}>
-           <PlusIcon size={24} color={theme.colors.darkRed} />
-        </Pressable>
+        {renderAttachmentButton ? (
+          renderAttachmentButton({
+            toggle: toggleUploadFooter,
+            showing: showUploadFooter,
+            onPressAttachment,
+            theme,
+          })
+        ) : (
+          <Pressable onPress={toggleUploadFooter} style={styles.addButton} accessibilityRole="button" accessibilityLabel="Open attachments">
+             <PlusIcon size={24} color={theme.colors.darkRed} />
+          </Pressable>
+        )}
 
         {renderComposer ? (
           renderComposer(props)

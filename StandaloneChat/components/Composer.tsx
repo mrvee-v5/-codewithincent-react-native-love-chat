@@ -40,7 +40,9 @@ const Composer = (props: ComposerProps) => {
       (composerHeight && composerHeight < maxComposerHeight) ||
       (composerHeight === maxComposerHeight && contentSize.height < maxComposerHeight)
     ) {
-      setComposerHeight(Math.max(minComposerHeight, Math.min(maxComposerHeight, contentSize.height)));
+      setComposerHeight(
+        Math.max(minComposerHeight, Math.min(maxComposerHeight, contentSize.height))
+      );
     }
   };
 
@@ -56,7 +58,7 @@ const Composer = (props: ComposerProps) => {
       onContentSizeChange={handleContentSizeChange}
       style={[
         styles.textInput,
-        { color: theme.colors.black, backgroundColor: theme.colors.primary },
+        { color: theme.colors.textPrimary, backgroundColor: theme.colors.primary },
         textInputStyle,
         {
           height: composerHeight,
@@ -75,15 +77,15 @@ const Composer = (props: ComposerProps) => {
 const styles = StyleSheet.create({
   textInput: {
     flex: 1,
-    fontSize: 16,
+    fontSize: defaultTheme.typography.title,
     lineHeight: 22,
     color: defaultTheme.colors.black,
     backgroundColor: defaultTheme.colors.primary,
     borderRadius: 20,
-    paddingHorizontal: 12,
-    paddingTop: Platform.OS === 'ios' ? 8 : 4,
-    paddingBottom: Platform.OS === 'ios' ? 8 : 4,
-    marginHorizontal: 8,
+    paddingHorizontal: defaultTheme.spacing.lg,
+    paddingTop: Platform.OS === 'ios' ? defaultTheme.spacing.md : defaultTheme.spacing.sm,
+    paddingBottom: Platform.OS === 'ios' ? defaultTheme.spacing.md : defaultTheme.spacing.sm,
+    marginHorizontal: defaultTheme.spacing.md,
   },
 });
 

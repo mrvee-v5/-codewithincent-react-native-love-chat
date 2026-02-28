@@ -54,13 +54,15 @@ const Demo = () => {
         _id: 100,
         text: 'Are we pushing the new release today?',
         createdAt: new Date(now - 1000 * 60 * 2),
-        user: { _id: 2, name: 'React Native' },
+        user: { _id: 2, name: 'React Native', avatar: 'https://picsum.photos/200/300' },
+        status: 'read',
       },
       {
         _id: 101,
         text: 'Yes, after final testing 🚀',
         createdAt: new Date(now - 1000 * 60 * 1),
-        user: { _id: 1, name: 'Developer' },
+        user: { _id: 1, name: 'Developer', avatar: 'https://picsum.photos/200/300' },
+        status: 'read',
       },
 
       // 🔵 TODAY - MORNING
@@ -68,14 +70,16 @@ const Demo = () => {
         _id: 102,
         text: 'Morning! Did you check the animations?',
         createdAt: new Date(now - 1000 * 60 * 60 * 6),
-        user: { _id: 2, name: 'React Native' },
+        user: { _id: 2, name: 'React Native', avatar: 'https://picsum.photos/200/300' },
+        status: 'read',
       },
       {
         _id: 103,
         text: 'Yes, swipe-to-reply feels smooth now.',
         createdAt: new Date(now - 1000 * 60 * 60 * 5.8),
-        user: { _id: 1, name: 'Developer' },
+        user: { _id: 1, name: 'Developer', avatar: 'https://picsum.photos/200/300' },
         reactions: [{ userId: 2, emoji: '🔥' }],
+        status: 'read',
       },
 
       // 🟡 YESTERDAY
@@ -83,20 +87,23 @@ const Demo = () => {
         _id: 104,
         text: 'Blur effect is now working on Expo.',
         createdAt: new Date(now - 1000 * 60 * 60 * 24),
-        user: { _id: 1, name: 'Developer' },
+        user: { _id: 1, name: 'Developer', avatar: 'https://picsum.photos/200/300' },
+        status: 'read',
       },
       {
         _id: 105,
         text: 'Nice! Did you implement fallback?',
         createdAt: new Date(now - 1000 * 60 * 60 * 23.5),
-        user: { _id: 2, name: 'React Native' },
+        user: { _id: 2, name: 'React Native', avatar: 'https://picsum.photos/200/300' },
+        status: 'read',
       },
       {
         _id: 106,
         text: 'Yes, universal adapter with dynamic require.',
         createdAt: new Date(now - 1000 * 60 * 60 * 23),
-        user: { _id: 1, name: 'Developer' },
+        user: { _id: 1, name: 'Developer', avatar: 'https://picsum.photos/200/300' },
         reactions: [{ userId: 2, emoji: '👏' }],
+        status: 'read',
       },
 
       // 🟠 2 DAYS AGO
@@ -104,14 +111,16 @@ const Demo = () => {
         _id: 107,
         text: 'Testing root siblings overlay.',
         createdAt: new Date(now - 1000 * 60 * 60 * 48),
-        user: { _id: 1, name: 'Developer' },
+        user: { _id: 1, name: 'Developer', avatar: 'https://picsum.photos/200/300' },
+        status: 'read',
       },
       {
         _id: 108,
         text: 'Long press popup looks clean 👌',
         createdAt: new Date(now - 1000 * 60 * 60 * 47.5),
-        user: { _id: 2, name: 'React Native' },
+        user: { _id: 2, name: 'React Native', avatar: 'https://picsum.photos/200/300' },
         reactions: [{ userId: 1, emoji: '💯' }],
+        status: 'read',
       },
 
       // 🟣 3 DAYS AGO - NIGHT
@@ -119,13 +128,15 @@ const Demo = () => {
         _id: 109,
         text: 'Working late today...',
         createdAt: new Date(now - 1000 * 60 * 60 * 72),
-        user: { _id: 1, name: 'Developer' },
+        user: { _id: 1, name: 'Developer', avatar: 'https://picsum.photos/200/300' },
+        status: 'read',
       },
       {
         _id: 110,
         text: 'Don’t forget to sleep 😴',
         createdAt: new Date(now - 1000 * 60 * 60 * 71.5),
-        user: { _id: 2, name: 'React Native' },
+        user: { _id: 2, name: 'React Native', avatar: 'https://picsum.photos/200/300' },
+        status: 'read',
       },
 
       // 🔴 4 DAYS AGO
@@ -133,20 +144,23 @@ const Demo = () => {
         _id: 111,
         text: 'Swipe to reply implemented!',
         createdAt: new Date(now - 1000 * 60 * 60 * 96),
-        user: { _id: 1, name: 'Developer' },
+        user: { _id: 1, name: 'Developer', avatar: 'https://picsum.photos/200/300' },
+        status: 'read',
       },
       {
         _id: 112,
         text: 'Reactions next?',
         createdAt: new Date(now - 1000 * 60 * 60 * 95.5),
-        user: { _id: 2, name: 'React Native' },
+        user: { _id: 2, name: 'React Native', avatar: 'https://picsum.photos/200/300' },
+        status: 'read',
       },
       {
         _id: 113,
         text: 'Yes. Adding emoji picker soon.',
         createdAt: new Date(now - 1000 * 60 * 60 * 95),
-        user: { _id: 1, name: 'Developer' },
+        user: { _id: 1, name: 'Developer', avatar: 'https://picsum.photos/200/300' },
         reactions: [{ userId: 2, emoji: '❤️' }],
+        status: 'read',
       },
 
       // 🟢 5 DAYS AGO
@@ -154,19 +168,22 @@ const Demo = () => {
         _id: 114,
         text: 'Initial chat layout completed.',
         createdAt: new Date(now - 1000 * 60 * 60 * 120),
-        user: { _id: 1, name: 'Developer' },
+        user: { _id: 1, name: 'Developer', avatar: 'https://picsum.photos/200/300' },
+        status: 'read',
       },
       {
         _id: 115,
         text: 'Scrolling performance looks good.',
         createdAt: new Date(now - 1000 * 60 * 60 * 119.5),
-        user: { _id: 2, name: 'React Native' },
+        user: { _id: 2, name: 'React Native', avatar: 'https://picsum.photos/200/300' },
+        status: 'read',
       },
       {
         _id: 116,
         text: 'Let’s optimize message rendering next.',
         createdAt: new Date(now - 1000 * 60 * 60 * 118),
-        user: { _id: 1, name: 'Developer' },
+        user: { _id: 1, name: 'Developer', avatar: 'https://picsum.photos/200/300' },
+        status: 'read',
       },
       // 🟤 FILE TYPES - MIXED (6 DAYS AGO)
 
@@ -174,64 +191,71 @@ const Demo = () => {
         _id: 117,
         text: '',
         createdAt: new Date(now - 1000 * 60 * 60 * 144),
-        user: { _id: 2, name: 'React Native' },
+        user: { _id: 2, name: 'React Native', avatar: 'https://picsum.photos/200/300' },
         image: 'https://picsum.photos/400/300',
         fileType: 'image',
+        status: 'read',
       },
 
       {
         _id: 118,
         text: '',
         createdAt: new Date(now - 1000 * 60 * 60 * 143.5),
-        user: { _id: 1, name: 'Developer' },
+        user: { _id: 1, name: 'Developer', avatar: 'https://picsum.photos/200/300' },
         image: 'https://picsum.photos/300/400',
         fileType: 'image',
         reactions: [{ userId: 2, emoji: '😍' }],
+        status: 'read',
       },
 
       {
         _id: 119,
         text: '',
         createdAt: new Date(now - 1000 * 60 * 60 * 143),
-        user: { _id: 2, name: 'React Native' },
+        user: { _id: 2, name: 'React Native', avatar: 'https://picsum.photos/200/300' },
         video: 'https://www.w3schools.com/html/mov_bbb.mp4',
         fileType: 'video',
+        status: 'read',
       },
 
       {
         _id: 120,
         text: '',
         createdAt: new Date(now - 1000 * 60 * 60 * 142.5),
-        user: { _id: 1, name: 'Developer' },
+        user: { _id: 1, name: 'Developer', avatar: 'https://picsum.photos/200/300' },
         video: 'https://www.w3schools.com/html/movie.mp4',
         fileType: 'video',
+        status: 'delivered',
       },
 
       {
         _id: 121,
         text: '',
         createdAt: new Date(now - 1000 * 60 * 60 * 142),
-        user: { _id: 2, name: 'React Native' },
+        user: { _id: 2, name: 'React Native', avatar: 'https://picsum.photos/200/300' },
         audio: 'https://samplelib.com/lib/preview/mp3/sample-15s.mp3',
         fileType: 'audio',
+        status: 'read',
       },
 
       {
         _id: 122,
         text: '',
         createdAt: new Date(now - 1000 * 60 * 60 * 141.5),
-        user: { _id: 1, name: 'Developer' },
+        user: { _id: 1, name: 'Developer', avatar: 'https://picsum.photos/200/300' },
         audio: 'https://samplelib.com/lib/preview/mp3/sample-12s.mp3',
         reactions: [{ userId: 2, emoji: '🎧' }],
         fileType: 'audio',
+        status: 'read',
       },
 
       {
         _id: 123,
         text: '',
         createdAt: new Date(now - 1000 * 60 * 60 * 141),
-        user: { _id: 2, name: 'React Native' },
+        user: { _id: 2, name: 'React Native', avatar: 'https://picsum.photos/200/300' },
         fileType: 'pdf',
+        status: 'read',
         fileName: 'Design_System_v2.pdf',
         fileUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
       },
@@ -240,31 +264,34 @@ const Demo = () => {
         _id: 124,
         text: '',
         createdAt: new Date(now - 1000 * 60 * 60 * 140.5),
-        user: { _id: 1, name: 'Developer' },
+        user: { _id: 1, name: 'Developer', avatar: 'https://picsum.photos/200/300' },
         fileType: 'file',
         fileName: 'Budget_2026.xls',
         fileUrl: 'https://example.com/budget.xls',
+        status: 'read',
       },
 
       {
         _id: 125,
         text: '',
         createdAt: new Date(now - 1000 * 60 * 60 * 140),
-        user: { _id: 2, name: 'React Native' },
+        user: { _id: 2, name: 'React Native', avatar: 'https://picsum.photos/200/300' },
         fileType: 'file',
         fileName: 'Architecture.doc',
         fileUrl: 'https://example.com/architecture.doc',
         reactions: [{ userId: 1, emoji: '📄' }],
+        status: 'read',
       },
 
       {
         _id: 126,
         text: '',
         createdAt: new Date(now - 1000 * 60 * 60 * 139.5),
-        user: { _id: 1, name: 'Developer' },
+        user: { _id: 1, name: 'Developer', avatar: 'https://picsum.photos/200/300' },
         fileType: 'file',
         fileName: 'Marketing_Pitch.ppt',
         fileUrl: 'https://example.com/pitch.ppt',
+        status: 'read',
       },
 
       {
@@ -275,6 +302,7 @@ const Demo = () => {
         fileType: 'file',
         fileName: 'changelog.txt',
         fileUrl: 'https://example.com/changelog.txt',
+        status: 'read',
       },
 
       // 🟣 REPLY TO FILE EXAMPLE
@@ -283,12 +311,13 @@ const Demo = () => {
         _id: 128,
         text: 'This PDF looks good 👍',
         createdAt: new Date(now - 1000 * 60 * 60 * 138.5),
-        user: { _id: 1, name: 'Developer' },
+        user: { _id: 1, name: 'Developer', avatar: 'https://picsum.photos/200/300' },
+        status: 'read',
         replyTo: {
           _id: 123,
           text: '',
           createdAt: new Date(now - 1000 * 60 * 60 * 141),
-          user: { _id: 2, name: 'React Native' },
+          user: { _id: 2, name: 'React Native', avatar: 'https://picsum.photos/200/300' },
           fileName: 'Design_System_v2.pdf',
         },
       },
@@ -297,7 +326,8 @@ const Demo = () => {
         _id: 129,
         text: 'We should revise slide 3.',
         createdAt: new Date(now - 1000 * 60 * 60 * 138),
-        user: { _id: 2, name: 'React Native' },
+        user: { _id: 2, name: 'React Native', avatar: 'https://picsum.photos/200/300' },
+        status: 'read',
         replyTo: {
           _id: 126,
           text: '',
@@ -334,6 +364,7 @@ const Demo = () => {
           user: user,
           video: 'https://www.w3schools.com/html/mov_bbb.mp4',
           fileType: 'video',
+          status: 'read',
         };
         onSend([videoMessage]);
         break;
@@ -491,7 +522,6 @@ const Demo = () => {
       <Chat
         messages={messages}
         isLoadingEarlier
-        isTyping
         loadEarlier
         onSend={onSend}
         user={user}

@@ -40,37 +40,34 @@ export interface ChatProps {
   placeholder?: string;
   text?: string;
   onInputTextChanged?: (text: string) => void;
-  dateFormat?: string;
-  timeFormat?: string;
 
   // Rendering overrides
   renderBubble?: (props: any) => React.ReactNode;
   renderInputToolbar?: (props: any) => React.ReactNode;
   renderComposer?: (props: any) => React.ReactNode;
   renderSend?: (props: any) => React.ReactNode;
-  renderAvatar?: (props: any) => React.ReactNode;
   renderMessage?: (props: any) => React.ReactNode;
   renderMessageText?: (props: any) => React.ReactNode;
   renderMessageImage?: (props: any) => React.ReactNode;
   renderMessageVideo?: (props: any) => React.ReactNode;
   renderMessageAudio?: (props: any) => React.ReactNode;
-  renderAudio?: (props: any) => React.ReactNode;
-  renderFooter?: () => React.ReactNode;
   renderChatFooter?: () => React.ReactNode;
   renderUploadFooter?: (props: any) => React.ReactNode;
+  renderAttachmentButton?: (props: {
+    toggle: () => void;
+    showing: boolean;
+    onPressAttachment?: (type: string) => void;
+    theme: any;
+  }) => React.ReactNode;
 
   // List props
   loadEarlier?: boolean;
   onLoadEarlier?: () => void;
   isLoadingEarlier?: boolean;
-  inverted?: boolean;
   listViewProps?: any;
 
   // Input props
-  onPressActionButton?: () => void;
-  renderActions?: (props: any) => React.ReactNode;
   textInputProps?: any;
-  minInputToolbarHeight?: number;
 
   // Actions
   onPressAttachment?: (type: string) => void;
@@ -83,6 +80,7 @@ export interface ChatProps {
   // Behavior
   keyboardShouldPersistTaps?: 'always' | 'never' | 'handled';
   isTyping?: boolean;
+  isGroup?: boolean;
 
   // Style overrides
   theme?: PartialTheme;

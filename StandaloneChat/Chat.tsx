@@ -93,20 +93,30 @@ const InnerChat = (props: ChatProps) => {
             easing: Easing.inOut(Easing.ease),
             useNativeDriver: true,
           }),
-        ])
+        ]),
+        { resetBeforeIteration: true }
       );
     const a1 = mk(d1, 0);
     const a2 = mk(d2, 150);
     const a3 = mk(d3, 300);
-    a1.start();
-    a2.start();
-    a3.start();
+    if (props.isTyping) {
+      d1.setValue(0);
+      d2.setValue(0);
+      d3.setValue(0);
+      a1.start();
+      a2.start();
+      a3.start();
+    } else {
+      a1.stop();
+      a2.stop();
+      a3.stop();
+    }
     return () => {
       a1.stop();
       a2.stop();
       a3.stop();
     };
-  }, []);
+  }, [props.isTyping]);
 
   const renderInput = () => {
     const inputProps = {
@@ -118,6 +128,7 @@ const InnerChat = (props: ChatProps) => {
       replyMessage,
       onClearReply: handleClearReply,
       renderUploadFooter,
+      renderAttachmentButton: props.renderAttachmentButton,
     };
 
     if (renderInputToolbar) {

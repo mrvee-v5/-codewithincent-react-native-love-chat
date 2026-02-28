@@ -100,7 +100,7 @@ const MessageList = (props: MessageListProps) => {
             <ActivityIndicator size="small" color={theme.colors.primary} />
           ) : (
             <TouchableOpacity onPress={onLoadEarlier}>
-              <Text style={[styles.loadEarlierText, { color: theme.colors.darkRed }]}>
+              <Text style={[styles.loadEarlierText, { color: theme.colors.iconAccentDanger }]}>
                 Load earlier messages
               </Text>
             </TouchableOpacity>
@@ -143,27 +143,27 @@ const shouldRenderDateHeader = (
 
 const styles = StyleSheet.create({
   listContent: {
-    paddingVertical: 10,
-    paddingHorizontal: 10,
-    paddingBottom: 20,
+    paddingVertical: defaultTheme.spacing.lg - 2,
+    paddingHorizontal: defaultTheme.spacing.lg - 2,
+    paddingBottom: defaultTheme.spacing.xl + 4,
   },
   dateHeader: {
     alignSelf: 'center',
     backgroundColor: defaultTheme.colors.lightGrey,
-    paddingVertical: 4,
-    paddingHorizontal: 12,
+    paddingVertical: defaultTheme.spacing.xs,
+    paddingHorizontal: defaultTheme.spacing.lg - 4,
     borderRadius: 16,
-    marginBottom: 16,
-    marginTop: 16,
+    marginBottom: defaultTheme.spacing.xl,
+    marginTop: defaultTheme.spacing.xl,
   },
   dateText: {
-    fontSize: 12,
+    fontSize: defaultTheme.typography.body2,
     color: defaultTheme.colors.gray,
     fontWeight: '500',
   },
   loadEarlierContainer: {
     alignItems: 'center',
-    paddingVertical: 10,
+    paddingVertical: defaultTheme.spacing.lg - 2,
   },
   loadEarlierText: {
     color: defaultTheme.colors.darkRed,

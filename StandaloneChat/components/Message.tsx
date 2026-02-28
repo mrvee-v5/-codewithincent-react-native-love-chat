@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Image } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   useSharedValue,
@@ -22,6 +22,7 @@ interface MessageProps {
   nextMessage?: IMessage;
   previousMessage?: IMessage;
   user: IUser;
+  isGroup?: boolean;
   renderBubble?: (props: any) => React.ReactNode;
   onLongPress?: (context: any, message: IMessage) => void;
   onPress?: (context: any, message: IMessage) => void;
@@ -138,6 +139,8 @@ const Message = (props: MessageProps) => {
         <ImageCard
           uri={currentMessage.image || currentMessage.fileUrl || ''}
           time={timestamp}
+          isMine={!!isMine}
+          status={currentMessage.status}
           setFullScreen={setFullScreen}
           isFullScreen={isFullScreen}
         />
@@ -150,20 +153,54 @@ const Message = (props: MessageProps) => {
         setFullScreen: setVideo,
         isFullScreen: isVideo,
       };
-      if (props.renderMessageVideo) return props.renderMessageVideo(currentProps);
+      if (props.renderMessageVideo) {
+        const videoChild = props.renderMessageVideo(currentProps);
+        if (!videoChild) return null;
+        const VideoWrapper = require('./media/VideoGroupWrapper').default;
+        return (
+          <VideoWrapper
+            isGroup={!!props.isGroup}
+            isMine={!!isMine}
+            name={!isMine ? currentMessage.user.name : undefined}
+            avatar={!isMine ? currentMessage.user.avatar : undefined}
+            time={timestamp}
+            status={currentMessage.status}>
+            {videoChild}
+          </VideoWrapper>
+        );
+      }
 
       return null;
     }
 
     if (currentMessage.audio || fileType === 'audio') {
-      if (props.renderMessageAudio) return props.renderMessageAudio(currentMessage);
-
+      if (props.renderMessageAudio) {
+        const audioChild = props.renderMessageAudio(currentMessage);
+        if (!audioChild) return null;
+        return (
+          <View>
+            {audioChild}
+            <View style={styles.footer}>
+              <Text
+                style={[styles.time, isMine ? styles.timeMine : { color: theme.colors.timestamp }]}>
+                {timestamp}
+              </Text>
+              {isMine && <MessageStatus status={currentMessage.status} isMine={!!isMine} />}
+            </View>
+          </View>
+        );
+      }
       return null;
     }
 
     if (fileType === 'file') {
       return (
-        <FileCard fileName={currentMessage.fileName || 'File'} isMine={!!isMine} time={timestamp} />
+        <FileCard
+          fileName={currentMessage.fileName || 'File'}
+          isMine={!!isMine}
+          time={timestamp}
+          status={currentMessage.status}
+        />
       );
     }
 
@@ -198,16 +235,19 @@ const Message = (props: MessageProps) => {
   const contentEl = renderContent();
   const bubbleContent = contentEl ? (
     <Bubble isOwnMessage={!!isMine} isMedia={isMedia}>
+      {props.isGroup && !isMine && currentMessage.user.name ? (
+        <Text style={styles.groupName} numberOfLines={1}>
+          {currentMessage.user.name}
+        </Text>
+      ) : null}
       {currentMessage.replyTo && <ReplyPreview replyTo={currentMessage.replyTo} />}
-
       {contentEl}
-
       {!isMedia && (
         <View style={styles.footer}>
-          <Text style={[styles.time, isMine ? styles.timeMine : { color: theme.colors.timestamp }]}>
+          <Text
+            style={[styles.time, isMine ? styles.timeMine : { color: theme.colors.textTimestamp }]}>
             {timestamp}
           </Text>
-
           {isMine && <MessageStatus status={currentMessage.status} isMine={!!isMine} />}
         </View>
       )}
@@ -216,6 +256,16 @@ const Message = (props: MessageProps) => {
 
   const messageView = (
     <View style={[styles.container, isMine ? styles.containerMine : styles.containerOther]}>
+      {props.isGroup && !isMine && currentMessage.user.avatar ? (
+        <Image
+          source={
+            typeof currentMessage.user.avatar === 'string'
+              ? { uri: currentMessage.user.avatar }
+              : (currentMessage.user.avatar as any)
+          }
+          style={styles.leftAvatar}
+        />
+      ) : null}
       <ReactionBubble
         reactions={reactions}
         isMine={!!isMine}
@@ -260,6 +310,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     paddingHorizontal: 8,
   },
+  leftAvatar: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: defaultTheme.colors.softGray,
+    marginRight: 6,
+    alignSelf: 'flex-start',
+  },
   containerMine: {
     justifyContent: 'flex-end',
   },
@@ -267,7 +325,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
   },
   text: {
-    fontSize: 16,
+    fontSize: defaultTheme.typography.title,
     lineHeight: 20,
   },
   textMine: {
@@ -283,7 +341,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   time: {
-    fontSize: 10,
+    fontSize: defaultTheme.typography.caption,
     marginRight: 4,
   },
   timeMine: {
@@ -294,6 +352,25 @@ const styles = StyleSheet.create({
   },
   reactionPopup: {
     backgroundColor: defaultTheme.colors.reactionPopupBg,
+  },
+  groupHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+    paddingLeft: 4,
+  },
+  groupAvatar: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: defaultTheme.colors.softGray,
+  },
+  groupName: {
+    fontSize: defaultTheme.typography.subtitle,
+    fontWeight: '600',
+    color: defaultTheme.colors.textGroupHeader,
+    marginLeft: 6,
+    paddingBottom: 4,
   },
 });
 

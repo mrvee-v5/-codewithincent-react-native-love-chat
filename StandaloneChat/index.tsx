@@ -7,3 +7,4 @@ export { default as InputToolbar } from './components/InputToolbar';
 export { default as Composer } from './components/Composer';
 export { default as Bubble } from './components/Bubble';
 export { default as MessageStatus } from './components/MessageStatus';
+export { default as VideoGroupWrapper } from './components/media/VideoGroupWrapper';
