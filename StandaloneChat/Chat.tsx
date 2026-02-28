@@ -1,5 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, KeyboardAvoidingView, Platform, SafeAreaView, UIManager, findNodeHandle } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
+  SafeAreaView,
+  UIManager,
+  findNodeHandle,
+  Animated,
+  Easing,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ChatProps, IMessage } from './types';
 import MessageList from './components/MessageList';
@@ -11,6 +21,9 @@ const InnerChat = (props: ChatProps) => {
   const insets = useSafeAreaInsets();
   const [containerTopOffset, setContainerTopOffset] = useState(0);
   const containerRef = React.useRef<SafeAreaView | null>(null);
+  const d1 = React.useRef(new Animated.Value(0)).current;
+  const d2 = React.useRef(new Animated.Value(0)).current;
+  const d3 = React.useRef(new Animated.Value(0)).current;
   const {
     messages = [],
     text: propText,
@@ -54,14 +67,46 @@ const InnerChat = (props: ChatProps) => {
   };
 
   const handleReply = (message: IMessage) => {
-      setReplyMessage(message);
-      onReply?.(message);
+    setReplyMessage(message);
+    onReply?.(message);
   };
 
   const handleClearReply = () => {
-      setReplyMessage(null);
-      onClearReply?.();
+    setReplyMessage(null);
+    onClearReply?.();
   };
+
+  useEffect(() => {
+    const mk = (v: Animated.Value, delay: number) =>
+      Animated.loop(
+        Animated.sequence([
+          Animated.delay(delay),
+          Animated.timing(v, {
+            toValue: 1,
+            duration: 300,
+            easing: Easing.inOut(Easing.ease),
+            useNativeDriver: true,
+          }),
+          Animated.timing(v, {
+            toValue: 0,
+            duration: 300,
+            easing: Easing.inOut(Easing.ease),
+            useNativeDriver: true,
+          }),
+        ])
+      );
+    const a1 = mk(d1, 0);
+    const a2 = mk(d2, 150);
+    const a3 = mk(d3, 300);
+    a1.start();
+    a2.start();
+    a3.start();
+    return () => {
+      a1.stop();
+      a2.stop();
+      a3.stop();
+    };
+  }, []);
 
   const renderInput = () => {
     const inputProps = {
@@ -78,11 +123,7 @@ const InnerChat = (props: ChatProps) => {
     if (renderInputToolbar) {
       return renderInputToolbar(inputProps);
     }
-    return (
-      <InputToolbar
-        {...inputProps}
-      />
-    );
+    return <InputToolbar {...inputProps} />;
   };
 
   return (
@@ -98,13 +139,11 @@ const InnerChat = (props: ChatProps) => {
             }
           });
         }
-      }}
-    >
+      }}>
       <KeyboardAvoidingView
         style={styles.keyboardAvoidingView}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? insets.top + containerTopOffset : 0}
-      >
+        keyboardVerticalOffset={Platform.OS === 'ios' ? insets.top + containerTopOffset : 0}>
         <View style={styles.contentContainer}>
           <MessageList
             {...props}
@@ -112,7 +151,19 @@ const InnerChat = (props: ChatProps) => {
             keyboardShouldPersistTaps={keyboardShouldPersistTaps}
             onReply={handleReply}
           />
-          
+          {props.isTyping && (
+            <View style={[styles.typingContainer, { backgroundColor: theme.colors.verySoftGray }]}>
+              <Animated.View
+                style={[styles.dot, { backgroundColor: theme.colors.gray, opacity: d1 }]}
+              />
+              <Animated.View
+                style={[styles.dot, { backgroundColor: theme.colors.gray, opacity: d2 }]}
+              />
+              <Animated.View
+                style={[styles.dot, { backgroundColor: theme.colors.gray, opacity: d3 }]}
+              />
+            </View>
+          )}
           {renderChatFooter?.()}
           {renderInput()}
         </View>
@@ -137,6 +188,21 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     flex: 1,
+  },
+  typingContainer: {
+    alignSelf: 'flex-start',
+    marginLeft: 12,
+    marginBottom: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 16,
+    flexDirection: 'row',
+    gap: 6,
+  },
+  dot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
   },
 });
 

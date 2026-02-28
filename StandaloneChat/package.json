@@ -1,6 +1,6 @@
 {
   "name": "@codewithvincent/react-native-love-chat",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "A fully featured React Native chat UI component with replies, reactions, media, and theming.",
   "license": "MIT",
   "private": false,
