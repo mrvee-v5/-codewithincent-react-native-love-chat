@@ -29,18 +29,18 @@ interface InputToolbarProps {
 
 const InputToolbar = (props: InputToolbarProps) => {
   const theme = useTheme();
-  const { 
-    onSend, 
-    text, 
-    renderComposer, 
-    renderSend, 
-    user, 
+  const {
+    onSend,
+    text,
+    renderComposer,
+    renderSend,
+    user,
     onPressAttachment,
     replyMessage,
     onClearReply,
     renderUploadFooter,
     renderAttachmentButton,
-    ...rest 
+    ...rest
   } = props;
 
   const [showUploadFooter, setShowUploadFooter] = useState(false);
@@ -49,7 +49,7 @@ const InputToolbar = (props: InputToolbarProps) => {
   useEffect(() => {
     const showSub = Keyboard.addListener(
       Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
-      e => {
+      (e) => {
         Animated.timing(keyboardHeight, {
           toValue: e.endCoordinates.height,
           duration: e.duration || 250,
@@ -60,7 +60,7 @@ const InputToolbar = (props: InputToolbarProps) => {
     );
     const hideSub = Keyboard.addListener(
       Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
-      e => {
+      (e) => {
         Animated.timing(keyboardHeight, {
           toValue: 0,
           duration: e.duration || 250,
@@ -106,13 +106,13 @@ const InputToolbar = (props: InputToolbarProps) => {
   return (
     <View>
       {replyMessage && (
-        <FooterReplyPreview 
-          chatMessage={replyMessage} 
-          clearReply={onClearReply} 
-          userId={user._id} 
+        <FooterReplyPreview
+          chatMessage={replyMessage}
+          clearReply={onClearReply}
+          userId={user._id}
         />
       )}
-      
+
       <View style={[styles.container, { borderTopColor: theme.colors.borderGray, backgroundColor: theme.colors.white }]}>
         {renderAttachmentButton ? (
           renderAttachmentButton({
@@ -122,45 +122,56 @@ const InputToolbar = (props: InputToolbarProps) => {
             theme,
           })
         ) : (
-          <Pressable onPress={toggleUploadFooter} style={styles.addButton} accessibilityRole="button" accessibilityLabel="Open attachments">
-             <PlusIcon size={24} color={theme.colors.darkRed} />
+          <Pressable
+            onPress={toggleUploadFooter}
+            style={styles.addButton}
+            accessibilityRole="button"
+            accessibilityLabel="Open attachments">
+            <PlusIcon size={24} color={theme.colors.darkRed} />
           </Pressable>
         )}
 
         {renderComposer ? (
           renderComposer(props)
         ) : (
-          <Composer 
-            {...rest} 
-            text={text} 
-            onSend={handleSend} 
+          <Composer
+            {...rest}
+            text={text}
+            onSend={handleSend}
             textInputProps={{
-               onFocus: () => setShowUploadFooter(false)
+              onFocus: () => setShowUploadFooter(false),
             }}
           />
         )}
-        
+
         {renderSend ? (
           renderSend({ ...props, onSend: handleSend })
         ) : (
-          <Pressable onPress={handleSend} style={styles.sendButton} disabled={!text || text.trim().length === 0}>
-             <View style={[styles.sendIconWrapper, { backgroundColor: theme.colors.darkRed }, (!text || text.trim().length === 0) && { backgroundColor: theme.colors.gray }]}>
-                <SendIcon size={18} color={theme.colors.white} />
-             </View>
+          <Pressable
+            onPress={handleSend}
+            style={styles.sendButton}
+            disabled={!text || text.trim().length === 0}>
+            <View
+              style={[
+                styles.sendIconWrapper,
+                { backgroundColor: theme.colors.darkRed },
+                (!text || text.trim().length === 0) && { backgroundColor: theme.colors.gray },
+              ]}>
+              <SendIcon size={18} color={theme.colors.white} />
+            </View>
           </Pressable>
         )}
       </View>
 
-      {showUploadFooter && (
-        renderUploadFooter ? (
+      {showUploadFooter &&
+        (renderUploadFooter ? (
           renderUploadFooter({
             onActionPress: handleActionPress,
             theme,
           })
         ) : (
           <UploadFooter onActionPress={handleActionPress} />
-        )
-      )}
+        ))}
     </View>
   );
 };

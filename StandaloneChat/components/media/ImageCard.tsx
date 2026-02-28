@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { TouchableOpacity, StyleSheet, Dimensions, Image, View, Modal, Text } from 'react-native';
 import { appSize } from '../../utils';
 import { CloseIcon } from '../Icons';

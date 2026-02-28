@@ -1,12 +1,5 @@
-import React, { useCallback, useMemo, useRef, useEffect } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ActivityIndicator,
-  InteractionManager,
-} from 'react-native';
+import React, { useCallback, useMemo, useRef } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { IMessage, ChatProps } from '../types';
 import Message from './Message';
@@ -14,47 +7,25 @@ import { isSameDay } from '../utils';
 import { defaultTheme, useTheme } from '../utils/theme';
 
 interface MessageListProps extends ChatProps {
+  contentContainerStyle?: any;
   inverted?: boolean;
 }
 
 const MessageList = (props: MessageListProps) => {
   const { messages, user, onLoadEarlier, loadEarlier, isLoadingEarlier } = props;
   const listRef = useRef<any>(null);
-  const isMounted = useRef(false);
   const theme = useTheme();
 
+  // ✅ DO NOT reverse when using inverted
   const listData = useMemo(() => {
-    return Array.isArray(messages) ? [...messages].reverse() : [];
+    return Array.isArray(messages) ? messages : [];
   }, [messages]);
-
-  // Automatic scrolling logic
-  useEffect(() => {
-    if (listData.length === 0) return;
-
-    if (!isMounted.current) {
-      // Scenario 1: Initial mount - scroll to bottom immediately
-      isMounted.current = true;
-      // Use a small timeout to ensure list is ready
-      const task = InteractionManager.runAfterInteractions(() => {
-        setTimeout(() => {
-          listRef.current?.scrollToEnd({ animated: false });
-        }, 0);
-      });
-      return () => task.cancel();
-    } else {
-      // Scenario 2: New message added - smooth scroll to bottom
-      // We can also check if we are already at the bottom to avoid annoyance,
-      // but requirements state "always displays the most recent message".
-      setTimeout(() => {
-        listRef.current?.scrollToEnd({ animated: true });
-      }, 200);
-    }
-  }, [listData.length]);
 
   const renderItem = useCallback(
     ({ item, index }: { item: IMessage; index: number }) => {
-      const previousMessage = listData[index - 1];
-      const nextMessage = listData[index + 1];
+      // 🔥 Fix for inverted list
+      const previousMessage = listData[index + 1];
+      const nextMessage = listData[index - 1];
 
       const messageProps = {
         ...props,
@@ -93,22 +64,21 @@ const MessageList = (props: MessageListProps) => {
   const keyExtractor = useCallback((item: IMessage) => item._id.toString(), []);
 
   const renderHeader = () => {
-    if (loadEarlier) {
-      return (
-        <View style={styles.loadEarlierContainer}>
-          {isLoadingEarlier ? (
-            <ActivityIndicator size="small" color={theme.colors.primary} />
-          ) : (
-            <TouchableOpacity onPress={onLoadEarlier}>
-              <Text style={[styles.loadEarlierText, { color: theme.colors.iconAccentDanger }]}>
-                Load earlier messages
-              </Text>
-            </TouchableOpacity>
-          )}
-        </View>
-      );
-    }
-    return null;
+    if (!loadEarlier) return null;
+
+    return (
+      <View style={styles.loadEarlierContainer}>
+        {isLoadingEarlier ? (
+          <ActivityIndicator size="small" color={theme.colors.primary} />
+        ) : (
+          <TouchableOpacity onPress={onLoadEarlier}>
+            <Text style={[styles.loadEarlierText, { color: theme.colors.iconAccentDanger }]}>
+              Load earlier messages
+            </Text>
+          </TouchableOpacity>
+        )}
+      </View>
+    );
   };
 
   return (
@@ -117,16 +87,17 @@ const MessageList = (props: MessageListProps) => {
       data={listData}
       renderItem={renderItem}
       keyExtractor={keyExtractor}
-      contentContainerStyle={styles.listContent}
-      ListHeaderComponent={renderHeader}
+      inverted
+      contentContainerStyle={[styles.listContent, props.contentContainerStyle]}
+      ListFooterComponent={renderHeader}
       keyboardShouldPersistTaps={props.keyboardShouldPersistTaps}
       maintainVisibleContentPosition={{
-        autoscrollToBottomThreshold: 0, // start from the bottom immediately
-        animateAutoScrollToBottom: false, // no noticeable animation
-        startRenderingFromBottom: true, // renders from bottom
+        startRenderingFromBottom: true,
+        autoscrollToBottomThreshold: 0,
+        minIndexForVisible: 0,
       }}
-      onStartReached={loadEarlier ? onLoadEarlier : undefined}
-      onStartReachedThreshold={0.1}
+      onEndReached={loadEarlier ? onLoadEarlier : undefined}
+      onEndReachedThreshold={0.1}
       estimatedItemSize={72}
       {...props.listViewProps}
     />
@@ -145,11 +116,9 @@ const styles = StyleSheet.create({
   listContent: {
     paddingVertical: defaultTheme.spacing.lg - 2,
     paddingHorizontal: defaultTheme.spacing.lg - 2,
-    paddingBottom: defaultTheme.spacing.xl + 4,
   },
   dateHeader: {
     alignSelf: 'center',
-    backgroundColor: defaultTheme.colors.lightGrey,
     paddingVertical: defaultTheme.spacing.xs,
     paddingHorizontal: defaultTheme.spacing.lg - 4,
     borderRadius: 16,
@@ -158,7 +127,6 @@ const styles = StyleSheet.create({
   },
   dateText: {
     fontSize: defaultTheme.typography.body2,
-    color: defaultTheme.colors.gray,
     fontWeight: '500',
   },
   loadEarlierContainer: {
@@ -166,7 +134,6 @@ const styles = StyleSheet.create({
     paddingVertical: defaultTheme.spacing.lg - 2,
   },
   loadEarlierText: {
-    color: defaultTheme.colors.darkRed,
     fontWeight: '600',
   },
 });

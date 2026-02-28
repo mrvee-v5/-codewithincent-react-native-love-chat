@@ -64,13 +64,16 @@ const VideoCard: React.FC<VideoMessageProps> = ({
 
   useEffect(() => {
     const ensurePlay = async () => {
-      if (!isFullScreen || !videoRef.current) return;
-      const status: AVPlaybackStatus = await videoRef.current.getStatusAsync();
-      if (!('isLoaded' in status) || !status.isLoaded) return;
-      const s = status as AVPlaybackStatusSuccess;
-      if (!s.isPlaying) {
-        await videoRef.current.playAsync();
+      if (!videoRef.current) return;
+      if (isFullScreen) {
+        // Optimistically set shouldPlay; Video will start once loaded
         setIsPlaying(true);
+        const status: AVPlaybackStatus = await videoRef.current.getStatusAsync();
+        if (!('isLoaded' in status) || !status.isLoaded) return;
+        const s = status as AVPlaybackStatusSuccess;
+        if (!s.isPlaying) {
+          await videoRef.current.playAsync();
+        }
       }
     };
     ensurePlay();
@@ -103,7 +106,14 @@ const VideoCard: React.FC<VideoMessageProps> = ({
         style={isFull ? styles.fullScreenVideo : styles.video}
         resizeMode={isFull ? ResizeMode.CONTAIN : ResizeMode.COVER}
         isLooping
-        shouldPlay={isPlaying}
+        shouldPlay={isFull || isPlaying}
+        onLoad={() => {
+          // Ensure playback starts when entering fullscreen once the video loads
+          if (isFull && videoRef.current) {
+            videoRef.current.playAsync();
+            setIsPlaying(true);
+          }
+        }}
         onPlaybackStatusUpdate={(status: AVPlaybackStatus) => {
           if (!('isLoaded' in status) || !status.isLoaded) return;
           const s = status as AVPlaybackStatusSuccess;

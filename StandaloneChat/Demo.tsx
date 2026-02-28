@@ -3,6 +3,7 @@ import { View, StyleSheet, Text, Alert, TouchableOpacity } from 'react-native';
 import { Chat, IMessage } from './index';
 import VideoCard from '../ChatScreen/media/VideoCard';
 import AudioCard from '../ChatScreen/media/AudioCard';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const Demo = () => {
   const [messages, setMessages] = useState<IMessage[]>([]);
@@ -482,19 +483,69 @@ const Demo = () => {
     themeMode === 'dark'
       ? {
           colors: {
-            white: '#0b0f12',
-            lightGrey: '#12171d',
-            softGray: '#0f1419',
-            verySoftGray: '#0e1318',
-            primary: '#4fd1a5',
-            darkRed: '#ff5757',
-            timestamp: '#96a2ab',
-            ownMessageBubble: '#2d7cff',
-            otherMessageBubble: '#1b2430',
-            ownMessageText: '#ffffff',
-            otherMessageText: '#e6e6e6',
-            ownFileBg: 'rgba(255,255,255,0.10)',
-            otherFileBg: 'rgba(255,255,255,0.06)',
+            primary: '#d2d2d2',
+            darkPrimary: '#1E40AF',
+            lightRed: '#2563EB',
+            darkRed: '#2563EB',
+            black: '#000',
+            lightBlack: '#605e5e',
+            gray: '#999',
+            pendingStatus: '#d2d2d2',
+            readStatus: '#2563EB',
+            deliveredStatus: '#8b8b8b',
+            sentStatus: '#8b8b8b',
+            white: '#fff',
+            darkBrown: '#54392A',
+            lightGrey: '#f8f8f8',
+            softGray: '#fafafa',
+            borderGray: '#eee',
+            textGray: '#9CA3AF',
+            softRed: '#fff7f7',
+            verySoftGray: '#f9f9f9',
+            timestamp: '#8b8b8b',
+            ownMessageBubble: '#2563EB',
+            otherMessageBubble: '#f9f9f9',
+            ownMessageText: '#fff',
+            otherMessageText: '#000',
+            groupUserName: '#8b8b8b',
+            ownFileBg: 'rgba(37, 99, 235, 0.1)',
+            otherFileBg: 'rgba(0, 0, 0, 0.05)',
+            timestampMine: 'rgba(255, 255, 255, 0.7)',
+            reactionPopupBg: '#202A30',
+            reactionMenuBg: 'rgba(30, 30, 30, 0.95)',
+            reactionMenuSeparator: 'rgba(255, 255, 255, 0.1)',
+            overlayBlack50: 'rgba(0,0,0,0.5)',
+            overlayBlack35: 'rgba(0,0,0,0.35)',
+            overlayBlack55: 'rgba(0,0,0,0.55)',
+            overlayWhite20: 'rgba(255,255,255,0.2)',
+            mediaThumbBg: '#ccc',
+            replyMediaBg: '#eee',
+            replyPreviewBorder: '#ddd',
+            progressTrackBg: '#e0e0e0',
+            mediumGray: '#666',
+            blurFallback: '#000000CC',
+            bgApp: '#fff',
+            bgModal: '#fff',
+            surfaceCard: '#f8f8f8',
+            surfaceBubbleOutgoing: '#2563EB',
+            surfaceBubbleIncoming: '#f9f9f9',
+            textPrimary: '#000',
+            textSecondary: '#999',
+            textInverse: '#fff',
+            textGroupHeader: '#8b8b8b',
+            textTimestamp: '#8b8b8b',
+            textTimestampMine: 'rgba(255, 255, 255, 0.7)',
+            textOnBubbleOutgoing: '#fff',
+            textOnBubbleIncoming: '#000',
+            textOnOverlay: '#fff',
+            statusPending: '#d2d2d2',
+            statusSent: '#8b8b8b',
+            statusDelivered: '#8b8b8b',
+            statusRead: '#2563EB',
+            iconOnBubbleOutgoing: '#fff',
+            iconAccentDanger: '#2563EB',
+            borderDefault: '#eee',
+            avatarPlaceholderBg: '#fafafa',
           },
         }
       : {};
@@ -509,9 +560,9 @@ const Demo = () => {
       />
     );
   };
-
+  const { top, bottom } = useSafeAreaInsets();
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingTop: top, paddingBottom: bottom + 10 }]}>
       <View style={styles.topBar}>
         <TouchableOpacity onPress={toggleTheme} style={styles.toggleButton}>
           <Text style={styles.toggleText}>

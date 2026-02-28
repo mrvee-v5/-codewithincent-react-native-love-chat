@@ -5,10 +5,9 @@ import {
   KeyboardAvoidingView,
   Platform,
   SafeAreaView,
-  UIManager,
-  findNodeHandle,
   Animated,
   Easing,
+  LayoutChangeEvent,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ChatProps, IMessage } from './types';
@@ -19,11 +18,7 @@ import { defaultTheme, ThemeProvider, useTheme } from './utils/theme';
 const InnerChat = (props: ChatProps) => {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
-  const [containerTopOffset, setContainerTopOffset] = useState(0);
-  const containerRef = React.useRef<SafeAreaView | null>(null);
-  const d1 = React.useRef(new Animated.Value(0)).current;
-  const d2 = React.useRef(new Animated.Value(0)).current;
-  const d3 = React.useRef(new Animated.Value(0)).current;
+
   const {
     messages = [],
     text: propText,
@@ -41,6 +36,11 @@ const InnerChat = (props: ChatProps) => {
 
   const [text, setText] = useState(propText || '');
   const [replyMessage, setReplyMessage] = useState<IMessage | null>(null);
+  const [inputHeight, setInputHeight] = useState(0);
+
+  const d1 = React.useRef(new Animated.Value(0)).current;
+  const d2 = React.useRef(new Animated.Value(0)).current;
+  const d3 = React.useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     if (propText !== undefined && propText !== text) {
@@ -50,9 +50,7 @@ const InnerChat = (props: ChatProps) => {
 
   const handleInputTextChanged = (newText: string) => {
     setText(newText);
-    if (onInputTextChanged) {
-      onInputTextChanged(newText);
-    }
+    onInputTextChanged?.(newText);
   };
 
   const handleSend = (newMessages: IMessage[]) => {
@@ -60,9 +58,7 @@ const InnerChat = (props: ChatProps) => {
       onSend(newMessages);
     }
     setText('');
-    if (onInputTextChanged) {
-      onInputTextChanged('');
-    }
+    onInputTextChanged?.('');
     setReplyMessage(null);
   };
 
@@ -96,9 +92,11 @@ const InnerChat = (props: ChatProps) => {
         ]),
         { resetBeforeIteration: true }
       );
+
     const a1 = mk(d1, 0);
     const a2 = mk(d2, 150);
     const a3 = mk(d3, 300);
+
     if (props.isTyping) {
       d1.setValue(0);
       d2.setValue(0);
@@ -111,6 +109,7 @@ const InnerChat = (props: ChatProps) => {
       a2.stop();
       a3.stop();
     }
+
     return () => {
       a1.stop();
       a2.stop();
@@ -134,52 +133,49 @@ const InnerChat = (props: ChatProps) => {
     if (renderInputToolbar) {
       return renderInputToolbar(inputProps);
     }
+
     return <InputToolbar {...inputProps} />;
   };
 
+  const handleInputLayout = (e: LayoutChangeEvent) => {
+    const { height } = e.nativeEvent.layout;
+    setInputHeight(height);
+  };
+
+  const bottomInset = inputHeight + insets.bottom + (props.isTyping ? 40 : 0); // approximate typing indicator height
+
   return (
-    <SafeAreaView
-      ref={containerRef}
-      style={[styles.container, { backgroundColor: theme.colors.white }, containerStyle]}
-      onLayout={() => {
-        const node = findNodeHandle(containerRef.current as unknown as any);
-        if (node) {
-          UIManager.measureInWindow(node, (_x, y) => {
-            if (typeof y === 'number') {
-              setContainerTopOffset(Math.max(0, Math.round(y)));
-            }
-          });
-        }
-      }}>
-      <KeyboardAvoidingView
-        style={styles.keyboardAvoidingView}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? insets.top + containerTopOffset : 0}>
-        <View style={styles.contentContainer}>
-          <MessageList
-            {...props}
-            messages={messages}
-            keyboardShouldPersistTaps={keyboardShouldPersistTaps}
-            onReply={handleReply}
-          />
-          {props.isTyping && (
-            <View style={[styles.typingContainer, { backgroundColor: theme.colors.verySoftGray }]}>
-              <Animated.View
-                style={[styles.dot, { backgroundColor: theme.colors.gray, opacity: d1 }]}
-              />
-              <Animated.View
-                style={[styles.dot, { backgroundColor: theme.colors.gray, opacity: d2 }]}
-              />
-              <Animated.View
-                style={[styles.dot, { backgroundColor: theme.colors.gray, opacity: d3 }]}
-              />
-            </View>
-          )}
-          {renderChatFooter?.()}
-          {renderInput()}
-        </View>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+    <KeyboardAvoidingView
+      style={styles.keyboardAvoidingView}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+      <View style={[styles.contentContainer, containerStyle]}>
+        <MessageList
+          {...props}
+          messages={messages}
+          keyboardShouldPersistTaps={keyboardShouldPersistTaps}
+          onReply={handleReply}
+          contentContainerStyle={{ paddingBottom: bottomInset }}
+        />
+
+        {props.isTyping && (
+          <View style={[styles.typingContainer, { backgroundColor: theme.colors.verySoftGray }]}>
+            <Animated.View
+              style={[styles.dot, { backgroundColor: theme.colors.gray, opacity: d1 }]}
+            />
+            <Animated.View
+              style={[styles.dot, { backgroundColor: theme.colors.gray, opacity: d2 }]}
+            />
+            <Animated.View
+              style={[styles.dot, { backgroundColor: theme.colors.gray, opacity: d3 }]}
+            />
+          </View>
+        )}
+
+        {renderChatFooter?.()}
+
+        <View onLayout={handleInputLayout}>{renderInput()}</View>
+      </View>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -190,10 +186,6 @@ const Chat = (props: ChatProps) => (
 );
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: defaultTheme.colors.white,
-  },
   keyboardAvoidingView: {
     flex: 1,
   },

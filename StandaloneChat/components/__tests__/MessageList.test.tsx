@@ -1,21 +1,18 @@
 // @ts-nocheck
 import React from 'react';
-import { render, fireEvent, act } from '@testing-library/react-native';
+import { render } from '@testing-library/react-native';
 import MessageList from '../MessageList';
 import { IMessage } from '../../types';
 
-// Mock FlashList
-const mockScrollToEnd = jest.fn();
+// Mock FlashList to expose passed props
+const capturedProps = { current: null as any };
 
 jest.mock('@shopify/flash-list', () => {
   const React = require('react');
   const { View } = require('react-native');
   return {
     FlashList: React.forwardRef((props: any, ref: any) => {
-      React.useImperativeHandle(ref, () => ({
-        scrollToEnd: mockScrollToEnd,
-        scrollToIndex: jest.fn(),
-      }));
+      capturedProps.current = props;
       return <View testID="flash-list" {...props} />;
     }),
   };
@@ -29,56 +26,35 @@ describe('MessageList', () => {
   ];
   const mockOnSend = jest.fn();
 
-  beforeEach(() => {
-    mockScrollToEnd.mockClear();
-    jest.useFakeTimers();
+  it('renders inverted list anchored to bottom', () => {
+    const { getByTestId } = render(
+      <MessageList messages={mockMessages} user={mockUser} onSend={mockOnSend} />
+    );
+    const list = getByTestId('flash-list');
+    expect(list.props.inverted).toBe(true);
+    expect(list.props.maintainVisibleContentPosition?.startRenderingFromBottom).toBe(true);
+    expect(list.props.maintainVisibleContentPosition?.minIndexForVisible).toBe(0);
   });
 
-  afterEach(() => {
-    jest.useRealTimers();
+  it('renders load earlier footer when enabled', () => {
+    const { getByTestId } = render(
+      <MessageList
+        messages={mockMessages}
+        user={mockUser}
+        onSend={mockOnSend}
+        loadEarlier
+        onLoadEarlier={jest.fn()}
+      />
+    );
+    const list = getByTestId('flash-list');
+    expect(list.props.ListFooterComponent).toBeDefined();
   });
 
-  it('scrolls to bottom on initial mount', () => {
+  it('uses keyExtractor to stringify ids', () => {
     render(<MessageList messages={mockMessages} user={mockUser} onSend={mockOnSend} />);
-    
-    // Initial mount uses setTimeout
-    act(() => {
-      jest.runAllTimers();
-    });
-
-    expect(mockScrollToEnd).toHaveBeenCalledWith({ animated: false });
-  });
-
-  it('scrolls to bottom when new message is added', () => {
-    const { rerender } = render(<MessageList messages={mockMessages} user={mockUser} onSend={mockOnSend} />);
-    
-    // Clear initial mount call
-    act(() => {
-      jest.runAllTimers();
-    });
-    mockScrollToEnd.mockClear();
-
-    const newMessages = [
-      { _id: 102, text: 'New Message', createdAt: new Date(), user: mockUser },
-      ...mockMessages,
-    ];
-
-    rerender(<MessageList messages={newMessages} user={mockUser} onSend={mockOnSend} />);
-
-    act(() => {
-      jest.runAllTimers();
-    });
-
-    expect(mockScrollToEnd).toHaveBeenCalledWith({ animated: true });
-  });
-
-  it('does not scroll if list is empty', () => {
-    render(<MessageList messages={[]} user={mockUser} onSend={mockOnSend} />);
-    
-    act(() => {
-      jest.runAllTimers();
-    });
-
-    expect(mockScrollToEnd).not.toHaveBeenCalled();
+    const keyExtractor = capturedProps.current?.keyExtractor;
+    expect(typeof keyExtractor).toBe('function');
+    const k = keyExtractor({ _id: 123 } as any);
+    expect(k).toBe('123');
   });
 });

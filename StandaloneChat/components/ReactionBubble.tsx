@@ -7,6 +7,7 @@ import {
   UIManager,
   findNodeHandle,
   Dimensions,
+  Platform,
 } from 'react-native';
 import Animated, {
   ZoomIn,
@@ -18,7 +19,7 @@ import Animated, {
 import RootSibling from 'react-native-root-siblings';
 import { UniversalBlurView } from './../components/adapters/UniversalBlurView';
 import { appSize } from '../utils';
-import { defaultTheme, useTheme } from '../utils/theme';
+import { defaultTheme, useTheme, ThemeProvider } from '../utils/theme';
 import { ReplyIcon, TrashIcon, DownloadIcon } from './Icons';
 
 const SCREEN = Dimensions.get('window');
@@ -209,97 +210,119 @@ export default function ReactionBubble({
     }
 
     siblingRef.current = new RootSibling(
-      <View style={styles.overlayContainer}>
-        <Pressable style={StyleSheet.absoluteFill} onPress={hidePopup}>
-          <UniversalBlurView
-            style={StyleSheet.absoluteFill}
-            blurType={'dark'}
-            blurAmount={12}
-            tint="dark"
-            intensity={60}
-            reducedTransparencyFallbackColor={theme.colors.blurFallback}
-          />
-        </Pressable>
+      <ThemeProvider
+        theme={{
+          colors: theme.colors,
+          spacing: (theme as any).spacing,
+          typography: (theme as any).typography,
+          fonts: (theme as any).fonts,
+        }}>
+        <View style={styles.overlayContainer}>
+          <Pressable style={StyleSheet.absoluteFill} onPress={hidePopup}>
+            <UniversalBlurView
+              style={StyleSheet.absoluteFill}
+              blurType={'dark'}
+              blurAmount={20}
+              tint="dark"
+              intensity={90}
+              reducedTransparencyFallbackColor={theme.colors.blurFallback}
+            />
+            {Platform.OS === 'android' && (
+              <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(0,0,0,0.45)' }]} />
+            )}
+          </Pressable>
 
-        <View
-          style={[
-            styles.messageDuplicateWrapper,
-            {
-              top: pos.y,
-              left: pos.x,
-              width: pos.width,
-            },
-          ]}>
-          {children}
-        </View>
+          <View
+            style={[
+              styles.messageDuplicateWrapper,
+              {
+                top: pos.y,
+                left: pos.x,
+                width: pos.width,
+              },
+            ]}>
+            {children}
+          </View>
 
-        {/* Reaction Bar */}
-        <Animated.View
-          entering={ZoomIn.duration(100)}
-          exiting={ZoomOut.duration(100)}
-          style={{
-            position: 'absolute',
-            top,
-            left,
-          }}>
-          <Animated.View style={[styles.popup, bubbleStyle, animStyle]}>
-            {reactions.map((r, i) => (
-              <Pressable key={i} onPress={() => handleReactionPress(r)}>
-                <Text style={[styles.reaction, reactionStyle]}>{r}</Text>
-              </Pressable>
-            ))}
+          {/* Reaction Bar */}
+          <Animated.View
+            entering={ZoomIn.duration(100)}
+            exiting={ZoomOut.duration(100)}
+            style={{
+              position: 'absolute',
+              top,
+              left,
+            }}>
+            <Animated.View
+              style={[
+                styles.popup,
+                { backgroundColor: theme.colors.reactionPopupBg },
+                bubbleStyle,
+                animStyle,
+              ]}>
+              {reactions.map((r, i) => (
+                <Pressable key={i} onPress={() => handleReactionPress(r)}>
+                  <Text style={[styles.reaction, reactionStyle]}>{r}</Text>
+                </Pressable>
+              ))}
+            </Animated.View>
           </Animated.View>
-        </Animated.View>
 
-        {/* Context Menu */}
-        <Animated.View
-          entering={ZoomIn.duration(150).delay(50)}
-          exiting={ZoomOut.duration(150)}
-          style={[
-            styles.contextMenu,
-            {
-              top: menuTop,
-              left: menuLeft,
-              width: menuWidth,
-            },
-          ]}>
-          {onReply && (
-            <Pressable
-              style={styles.menuItem}
-              onPress={() => {
-                hidePopup();
-                onReply();
-              }}>
-              <Text style={styles.menuText}>Reply</Text>
-              <ReplyIcon size={18} color={theme.colors.white} />
-            </Pressable>
-          )}
+          {/* Context Menu */}
+          <Animated.View
+            entering={ZoomIn.duration(150).delay(50)}
+            exiting={ZoomOut.duration(150)}
+            style={[
+              styles.contextMenu,
+              {
+                top: menuTop,
+                left: menuLeft,
+                width: menuWidth,
+                backgroundColor: theme.colors.reactionMenuBg,
+              },
+            ]}>
+            {onReply && (
+              <Pressable
+                style={styles.menuItem}
+                onPress={() => {
+                  hidePopup();
+                  onReply();
+                }}>
+                <Text style={[styles.menuText, { color: theme.colors.textOnOverlay }]}>Reply</Text>
+                <ReplyIcon size={18} color={theme.colors.textOnOverlay} />
+              </Pressable>
+            )}
 
-          {isFile && onDownload && (
-            <Pressable
-              style={styles.menuItem}
-              onPress={() => {
-                hidePopup();
-                onDownload();
-              }}>
-              <Text style={styles.menuText}>Download</Text>
-              <DownloadIcon size={18} color={theme.colors.white} />
-            </Pressable>
-          )}
+            {isFile && onDownload && (
+              <Pressable
+                style={styles.menuItem}
+                onPress={() => {
+                  hidePopup();
+                  onDownload();
+                }}>
+                <Text style={[styles.menuText, { color: theme.colors.textOnOverlay }]}>
+                  Download
+                </Text>
+                <DownloadIcon size={18} color={theme.colors.textOnOverlay} />
+              </Pressable>
+            )}
 
-          {onDelete && (
-            <Pressable
-              style={[styles.menuItem, { borderBottomWidth: 0 }]}
-              onPress={() => {
-                hidePopup();
-                onDelete();
-              }}>
-              <Text style={[styles.menuText, { color: defaultTheme.colors.darkRed }]}>Delete</Text>
-              <TrashIcon size={18} />
-            </Pressable>
-          )}
-        </Animated.View>
-      </View>
+            {onDelete && (
+              <Pressable
+                style={[styles.menuItem, { borderBottomWidth: 0 }]}
+                onPress={() => {
+                  hidePopup();
+                  onDelete();
+                }}>
+                <Text style={[styles.menuText, { color: theme.colors.iconAccentDanger }]}>
+                  Delete
+                </Text>
+                <TrashIcon size={18} color={theme.colors.iconAccentDanger} />
+              </Pressable>
+            )}
+          </Animated.View>
+        </View>
+      </ThemeProvider>
     );
 
     requestAnimationFrame(() => {
@@ -413,7 +436,6 @@ const styles = StyleSheet.create({
     borderBottomColor: defaultTheme.colors.reactionMenuSeparator,
   },
   menuText: {
-    color: defaultTheme.colors.white,
     fontSize: 16,
     fontWeight: '400',
   },
