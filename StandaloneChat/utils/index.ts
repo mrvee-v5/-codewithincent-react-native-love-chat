@@ -3,12 +3,12 @@ import { Dimensions, PixelRatio } from 'react-native';
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 const widthPercentageToDP = (widthPercent: string | number) => {
-  const elemWidth = typeof widthPercent === "number" ? widthPercent : parseFloat(widthPercent);
+  const elemWidth = typeof widthPercent === 'number' ? widthPercent : parseFloat(widthPercent);
   return PixelRatio.roundToNearestPixel((SCREEN_WIDTH * elemWidth) / 100);
 };
 
 const heightPercentageToDP = (heightPercent: string | number) => {
-  const elemHeight = typeof heightPercent === "number" ? heightPercent : parseFloat(heightPercent);
+  const elemHeight = typeof heightPercent === 'number' ? heightPercent : parseFloat(heightPercent);
   return PixelRatio.roundToNearestPixel((SCREEN_HEIGHT * elemHeight) / 100);
 };
 
@@ -48,4 +48,20 @@ export const isSameDay = (currentMessage: any, diffMessage: any) => {
     currentCreatedAt.getMonth() === diffCreatedAt.getMonth() &&
     currentCreatedAt.getFullYear() === diffCreatedAt.getFullYear()
   );
+};
+
+export const sortByDate = (messages: any, order = 'AC') => {
+  return [...messages].sort((a, b) => {
+    const dateA = new Date(a.createdAt).getTime();
+    const dateB = new Date(b.createdAt).getTime();
+
+    if (isNaN(dateA) || isNaN(dateB)) {
+      return 0; // Keep relative order if date is invalid
+    }
+
+    if (order === 'AC') return dateA - dateB;
+    if (order === 'DC') return dateB - dateA;
+
+    throw new Error("Invalid order parameter. Use 'AC' or 'DC'.");
+  });
 };

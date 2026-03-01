@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'rea
 import { FlashList } from '@shopify/flash-list';
 import { IMessage, ChatProps } from '../types';
 import Message from './Message';
-import { isSameDay } from '../utils';
+import { isSameDay, sortByDate } from '../utils';
 import { defaultTheme, useTheme } from '../utils/theme';
 
 interface MessageListProps extends ChatProps {
@@ -16,16 +16,14 @@ const MessageList = (props: MessageListProps) => {
   const listRef = useRef<any>(null);
   const theme = useTheme();
 
-  // ✅ DO NOT reverse when using inverted
   const listData = useMemo(() => {
     return Array.isArray(messages) ? messages : [];
   }, [messages]);
 
   const renderItem = useCallback(
     ({ item, index }: { item: IMessage; index: number }) => {
-      // 🔥 Fix for inverted list
-      const previousMessage = listData[index + 1];
-      const nextMessage = listData[index - 1];
+      const previousMessage = listData[index - 1];
+      const nextMessage = listData[index + 1];
 
       const messageProps = {
         ...props,
