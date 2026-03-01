@@ -19,10 +19,10 @@ jest.mock('@shopify/flash-list', () => {
 });
 
 describe('MessageList', () => {
-  const mockUser = { _id: 1, name: 'User' };
+  const mockUser = { id: 1, name: 'User' };
   const mockMessages: IMessage[] = [
-    { _id: 101, text: 'Hello', createdAt: new Date(), user: mockUser },
-    { _id: 100, text: 'World', createdAt: new Date(Date.now() - 1000), user: { _id: 2, name: 'Other' } },
+    { id: 101, text: 'Hello', createdAt: new Date(), user: mockUser },
+    { id: 100, text: 'World', createdAt: new Date(Date.now() - 1000), user: { id: 2, name: 'Other' } },
   ];
   const mockOnSend = jest.fn();
 
@@ -54,7 +54,7 @@ describe('MessageList', () => {
     render(<MessageList messages={mockMessages} user={mockUser} onSend={mockOnSend} />);
     const keyExtractor = capturedProps.current?.keyExtractor;
     expect(typeof keyExtractor).toBe('function');
-    const k = keyExtractor({ _id: 123 } as any);
+    const k = keyExtractor({ id: 123 } as any);
     expect(k).toBe('123');
   });
 });

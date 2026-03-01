@@ -1,15 +1,23 @@
-# Changelog
+# StandaloneChat Changelog
 
-All notable changes to this project will be documented in this file.
+## Emoji Management for Group Images
 
-## 0.2.3
-- Add bottom-right status receipts and timestamp overlay for video messages
-- Align image card timestamp and status inline side-by-side
-- Introduce semantic color tokens for easier theming and consistency
-- Expose renderAttachmentButton to customize the plus CTA and handle onPress externally
-- Theme spacing/typography scales applied across components (Composer, Message, Media cards)
+- Added modal-first removal flow for group emojis. Users open the reactions modal, select an emoji chip, then tap their own user row to remove their reaction.
+- Implemented permission control: users can only remove their own reactions; other rows are non-interactive.
+- Exposed `onRemoveEmoji` public API on `ChatProps` for programmatic removal. Signature: `(message, emojiObj) => void`, where `emojiObj` includes `{ emoji: string; userId?: string | number }`.
+- Restored modal visibility by reverting group card tap behavior to always open the modal and relocating removal action inside the modal user list.
+- Integrated theming for modal backdrop and sheet; ensured scrollable content with fixed header/footer.
+- Added optional props to `ReactionBubble` (`userId`, `onRemoveEmoji`, `closeOnBackdropPress`) without breaking existing usage.
+- Exported helpers: `aggregateGrouped`, `hasUserEmoji`, `canRemoveOwn`, `usersForEmoji`, `countForEmoji` to support tests and external integrations.
 
-## 0.1.0
-- Initial release of react-native-standalone-chat
-- Replies, reactions, media attachments, load earlier, theming
-- TypeScript definitions and build output
+## Tests
+
+- Unit tests for permissions: `hasUserEmoji` and `canRemoveOwn`.
+- Modal integration tests: `aggregateGrouped`, `countForEmoji`, and `usersForEmoji`.
+- Regression tests for backdrop close behavior: `shouldCloseOnBackdropPress`.
+
+## Notes on Backward Compatibility
+
+- All new props and exports are optional additions.
+- Existing behavior is preserved unless new features are explicitly opted-in.
+

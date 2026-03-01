@@ -59,7 +59,7 @@ const MessageList = (props: MessageListProps) => {
     [listData, user, props]
   );
 
-  const keyExtractor = useCallback((item: IMessage) => item._id.toString(), []);
+  const keyExtractor = useCallback((item: IMessage) => item.id.toString(), []);
 
   const renderHeader = () => {
     if (!loadEarlier) return null;

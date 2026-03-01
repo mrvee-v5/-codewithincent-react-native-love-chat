@@ -14,7 +14,7 @@ const FooterReplyPreview = ({ chatMessage, clearReply, userId }: FooterReplyPrev
   const theme = useTheme();
   if (!chatMessage) return null;
 
-  const isMine = chatMessage.user?._id === userId;
+  const isMine = chatMessage.user?.id === userId;
   const senderName = isMine ? 'You' : chatMessage.user?.name || 'Unknown';
 
   const getFileNameFromUrl = (url?: string) => {

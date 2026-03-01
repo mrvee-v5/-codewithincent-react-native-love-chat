@@ -29,10 +29,10 @@ describe('Chat media refactor', () => {
     const Chat = require('../Chat').default;
     const renderVideoCard = jest.fn(() => null);
 
-    const user = { _id: 'u1', name: 'User' };
+    const user = { id: 'u1', name: 'User' };
     const messages = [
       {
-        _id: 'm1',
+        id: 'm1',
         text: '',
         createdAt: Date.now(),
         user,
@@ -59,10 +59,10 @@ describe('Chat media refactor', () => {
     const Chat = require('../Chat').default;
     const renderAudio = jest.fn(() => null);
 
-    const user = { _id: 'u1', name: 'User' };
+    const user = { id: 'u1', name: 'User' };
     const messages = [
       {
-        _id: 'm2',
+        id: 'm2',
         text: '',
         createdAt: Date.now(),
         user,
@@ -87,10 +87,10 @@ describe('Chat media refactor', () => {
 
   test('renders text-only messages identically without render props', () => {
     const Chat = require('../Chat').default;
-    const user = { _id: 'u1', name: 'User' };
+    const user = { id: 'u1', name: 'User' };
     const messages = [
       {
-        _id: 'm3',
+        id: 'm3',
         text: 'Hello world',
         createdAt: Date.now(),
         user,

@@ -1,6 +1,6 @@
 {
   "name": "@codewithvincent/react-native-love-chat",
-  "version": "0.2.6",
+  "version": "0.2.8",
   "description": "A fully featured React Native chat UI component with replies, reactions, media, and theming.",
   "license": "MIT",
   "private": false,
@@ -17,7 +17,8 @@
     "dist",
     "README.md",
     "LICENSE",
-    "CHANGELOG.md"
+    "CHANGELOG.md",
+    "docs"
   ],
   "scripts": {
     "build": "tsc -p tsconfig.json",

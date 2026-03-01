@@ -4,7 +4,6 @@ import {
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
-  SafeAreaView,
   Animated,
   Easing,
   LayoutChangeEvent,
@@ -13,7 +12,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ChatProps, IMessage } from './types';
 import MessageList from './components/MessageList';
 import InputToolbar from './components/InputToolbar';
-import { defaultTheme, ThemeProvider, useTheme } from './utils/theme';
+import { ThemeProvider, useTheme } from './utils/theme';
 
 const InnerChat = (props: ChatProps) => {
   const theme = useTheme();

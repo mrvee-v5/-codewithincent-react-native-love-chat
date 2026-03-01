@@ -77,7 +77,7 @@ const InputToolbar = (props: InputToolbarProps) => {
   const handleSend = () => {
     if (text && text.trim().length > 0) {
       const message = {
-        _id: Math.round(Math.random() * 1000000),
+        id: Math.round(Math.random() * 1000000),
         text: text.trim(),
         createdAt: new Date(),
         user: user,
@@ -106,14 +106,14 @@ const InputToolbar = (props: InputToolbarProps) => {
   return (
     <View>
       {replyMessage && (
-        <FooterReplyPreview
-          chatMessage={replyMessage}
-          clearReply={onClearReply}
-          userId={user._id}
-        />
+        <FooterReplyPreview chatMessage={replyMessage} clearReply={onClearReply} userId={user.id} />
       )}
 
-      <View style={[styles.container, { borderTopColor: theme.colors.borderGray, backgroundColor: theme.colors.white }]}>
+      <View
+        style={[
+          styles.container,
+          { borderTopColor: theme.colors.borderGray, backgroundColor: theme.colors.white },
+        ]}>
         {renderAttachmentButton ? (
           renderAttachmentButton({
             toggle: toggleUploadFooter,

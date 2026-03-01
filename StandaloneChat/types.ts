@@ -1,13 +1,13 @@
 import { PartialTheme } from './utils/theme';
 
 export interface IUser {
-  _id: string | number;
+  id: string | number;
   name?: string;
   avatar?: string | number;
 }
 
 export interface IMessage {
-  _id: string | number;
+  id: string | number;
   text: string;
   createdAt: Date | number;
   user: IUser;
@@ -35,6 +35,7 @@ export interface ChatProps {
   messages: IMessage[];
   user: IUser;
   onSend: (messages: IMessage[]) => void;
+  participants?: IUser[];
 
   // Customization
   placeholder?: string;
@@ -74,6 +75,7 @@ export interface ChatProps {
   onReply?: (message: IMessage) => void;
   onClearReply?: () => void;
   onReaction?: (message: IMessage, reaction: string) => void;
+  onRemoveEmoji?: (message: IMessage, emoji: { emoji: string; userId?: string | number }) => void;
   onDeleteMessage?: (message: IMessage) => void;
   onDownloadFile?: (message: IMessage) => void;
 

@@ -42,16 +42,16 @@ import { Chat, IMessage } from '@codewithvincent/react-native-love-chat';
 
 export default function ChatScreen() {
   const [messages, setMessages] = useState<IMessage[]>([]);
-  const user = { _id: 1, name: 'Developer' };
+  const user = { id: 1, name: 'Developer' };
 
   useEffect(() => {
     setMessages([
       {
-        _id: 1,
+        id: 1,
         text: 'Hello developer',
         createdAt: new Date(),
         user: {
-          _id: 2,
+          id: 2,
           name: 'React Native',
           avatar: 'https://placeimg.com/140/140/any',
         },
@@ -70,6 +70,12 @@ export default function ChatScreen() {
 ```
 
 ## API Reference
+
+For the exhaustive, parameter-by-parameter documentation, see the full API guide:
+
+- Full API (latest): https://unpkg.com/@codewithvincent/react-native-love-chat@latest/docs/API.md
+
+The link above points to the docs file shipped in the npm package, ensuring it’s always in sync with the published version.
 
 ### Essential Props
 
@@ -94,7 +100,7 @@ export default function ChatScreen() {
 
 ```typescript
 interface IMessage {
-  _id: string | number;
+  id: string | number;
   text: string;
   createdAt: Date | number;
   user: IUser;
@@ -113,7 +119,7 @@ interface IMessage {
 
 ```typescript
 interface IUser {
-  _id: string | number;
+  id: string | number;
   name?: string;
   avatar?: string | number;
 }

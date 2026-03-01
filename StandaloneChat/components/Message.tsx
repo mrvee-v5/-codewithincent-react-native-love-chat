@@ -23,11 +23,13 @@ interface MessageProps {
   previousMessage?: IMessage;
   user: IUser;
   isGroup?: boolean;
+  participants?: IUser[];
   renderBubble?: (props: any) => React.ReactNode;
   onLongPress?: (context: any, message: IMessage) => void;
   onPress?: (context: any, message: IMessage) => void;
   onReply?: (message: IMessage) => void;
   onReaction?: (message: IMessage, reaction: string) => void;
+  onRemoveEmoji?: (message: IMessage, emoji: { emoji: string; userId?: string | number }) => void;
   onDeleteMessage?: (message: IMessage) => void;
   onDownloadFile?: (message: IMessage) => void;
   renderMessageText?: (props: any) => React.ReactNode;
@@ -53,7 +55,7 @@ const Message = (props: MessageProps) => {
     onDownloadFile,
   } = props;
 
-  const isMine = currentMessage.user._id === user._id || currentMessage.isMine;
+  const isMine = currentMessage.user.id === user.id || currentMessage.isMine;
 
   const fileType = currentMessage.fileType?.toLowerCase();
 
@@ -231,7 +233,13 @@ const Message = (props: MessageProps) => {
 
   const reactions = ['👍', '❤️', '😂', '😮', '😢', '🤲'];
 
-  const myReaction = currentMessage.reactions?.find((r: any) => r.userId === user._id)?.emoji;
+  const myReaction = currentMessage.reactions?.find((r: any) => r.userId === user.id)?.emoji;
+  const otherReaction = currentMessage.reactions?.find((r: any) => r.userId !== user.id)?.emoji;
+  console.log('myReaction', myReaction);
+  console.log('otherReaction', otherReaction);
+  // =============================
+  // Render
+  // =============================
   const contentEl = renderContent();
   const bubbleContent = contentEl ? (
     <Bubble isOwnMessage={!!isMine} isMedia={isMedia}>
@@ -269,7 +277,19 @@ const Message = (props: MessageProps) => {
       <ReactionBubble
         reactions={reactions}
         isMine={!!isMine}
+        isGroup={!!props.isGroup}
+        messageReactions={currentMessage.reactions as any}
+        participants={props.participants}
+        userId={user.id}
+        onRemoveEmoji={
+          props.onRemoveEmoji
+            ? (emoji: { emoji: string; userId?: string | number }) =>
+                props.onRemoveEmoji!(currentMessage, emoji)
+            : undefined
+        }
+        closeOnBackdropPress
         selectedReaction={myReaction}
+        selectedOtherReaction={otherReaction}
         onReactionPress={handleReactionPress}
         onPress={handlePress}
         onLongPress={handleLongPress}

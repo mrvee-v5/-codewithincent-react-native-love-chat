@@ -32,7 +32,7 @@ export const isSameUser = (currentMessage: any, diffMessage: any) => {
     diffMessage &&
     diffMessage.user &&
     currentMessage.user &&
-    diffMessage.user._id === currentMessage.user._id
+    diffMessage.user.id === currentMessage.user.id
   );
 };
 
