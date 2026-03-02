@@ -573,7 +573,7 @@ export default function ReactionBubble({
                   setRemoving(true);
                   try {
                     if (onRemoveEmoji) {
-                      onRemoveEmoji({ emoji: selectedEmoji, userId });
+                      onRemoveEmoji({ emoji: selectedEmoji || '', userId });
                     } else {
                       onReactionPress(undefined);
                     }

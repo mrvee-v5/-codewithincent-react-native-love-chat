@@ -175,17 +175,11 @@ const InnerChat = (props: ChatProps) => {
   return (
     <View style={styles.keyboardAvoidingView}>
       {renderChatHeader ? (
-        <View style={[styles.headerContainer, { paddingTop: inset.top }]}>
-          {renderChatHeader?.()}
-        </View>
+        <View style={[styles.headerContainer]}>{renderChatHeader?.()}</View>
       ) : null}
 
       <KeyboardStickyView
-        style={[
-          styles.contentContainer,
-          containerStyle,
-          { paddingTop: inset.top, paddingBottom: inset.bottom },
-        ]}>
+        style={[styles.contentContainer, containerStyle, { paddingBottom: inset.bottom }]}>
         <MessageList
           {...props}
           messages={messages}

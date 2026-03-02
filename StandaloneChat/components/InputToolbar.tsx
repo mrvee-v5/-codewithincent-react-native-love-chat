@@ -1,10 +1,11 @@
 import React, { useState, useRef } from 'react';
-import { View, StyleSheet, Pressable, Animated, Easing } from 'react-native';
+import { View, StyleSheet, Pressable, Animated, Easing, TouchableOpacity } from 'react-native';
 import Composer from './Composer';
 import { useTheme } from '../utils/theme';
-import { SendIcon, ImageIcon, VideoIcon, MicIcon, ChevronDownIcon } from './Icons';
+import { SendIcon, PlusIcon } from './Icons';
 import FooterReplyPreview from './FooterReplyPreview';
 import { IMessage } from '../types';
+import { appSize } from '../utils';
 
 interface InputToolbarProps {
   onSend?: (messages: any[]) => void;
@@ -113,35 +114,16 @@ const InputToolbar = (props: InputToolbarProps) => {
    * and clears the reply message.
    */
   const handleSend = () => {
-    if (text && text.trim().length > 0) {
-      const message = {
-        id: Math.random().toString(),
-        text: text.trim(),
-        createdAt: new Date(),
-        user,
-        replyTo: replyMessage,
-      };
+    const message = {
+      id: Math.random().toString(),
+      text: text,
+      createdAt: new Date(),
+      user,
+      replyTo: replyMessage,
+    };
 
-      onSend?.([message]);
-      onClearReply?.();
-    }
-  };
-
-  const hasText = !!text && text.trim().length > 0;
-
-  const animatedWidth = iconsAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0, ICONS_WIDTH],
-  });
-  const rotateStyle = {
-    transform: [
-      {
-        rotate: rotateAnim.interpolate({
-          inputRange: [0, 1],
-          outputRange: ['0deg', '180deg'],
-        }),
-      },
-    ],
+    onSend?.([message]);
+    onClearReply?.();
   };
 
   /**
@@ -173,37 +155,14 @@ const InputToolbar = (props: InputToolbarProps) => {
         {renderToggleIcon ? (
           renderToggleIcon({ expanded: isFocused, onToggle: handleTogglePress, rotateAnim })
         ) : (
-          <Pressable onPress={handleTogglePress} style={[styles.iconBtn, styles.toggleBtn]}>
-            <Animated.View style={rotateStyle}>
-              <ChevronDownIcon size={20} color={theme.colors.mediumGray} />
-            </Animated.View>
-          </Pressable>
-        )}
-
-        <Animated.View
-          style={[
-            {
-              width: animatedWidth,
-              opacity: iconsAnim,
-              overflow: 'hidden',
-            },
-          ]}>
-          {props.renderInputLeftContent ? (
-            props.renderInputLeftContent(props)
-          ) : (
-            <View style={styles.toolsRow}>
-              <Pressable onPress={() => onPressAttachment?.('Image')} style={styles.iconBtn}>
-                <ImageIcon size={22} color={theme.colors.darkRed} />
-              </Pressable>
-              <Pressable onPress={() => onPressAttachment?.('Video')} style={styles.iconBtn}>
-                <VideoIcon size={22} color={theme.colors.darkRed} />
-              </Pressable>
-              <Pressable onPress={() => onPressAttachment?.('Audio')} style={styles.iconBtn}>
-                <MicIcon size={22} color={theme.colors.darkRed} />
-              </Pressable>
+          <TouchableOpacity
+            onPress={() => onPressAttachment?.('Image')}
+            style={[styles.iconBtn, styles.toggleBtn]}>
+            <View>
+              <PlusIcon size={25} color={theme.colors.mediumGray} />
             </View>
-          )}
-        </Animated.View>
+          </TouchableOpacity>
+        )}
 
         {/* Composer */}
         <View style={styles.composerWrapper}>
@@ -213,6 +172,7 @@ const InputToolbar = (props: InputToolbarProps) => {
             <Composer
               {...rest}
               text={text}
+              onTextChanged={props.onTextChanged}
               onSend={handleSend}
               textInputProps={{
                 multiline: true,
@@ -225,16 +185,17 @@ const InputToolbar = (props: InputToolbarProps) => {
 
         {/* Send */}
         <View style={styles.rightActions}>
-          {hasText &&
-            (renderSend ? (
-              renderSend({ ...props, onSend: handleSend })
-            ) : (
-              <Pressable onPress={handleSend} style={styles.sendButton}>
-                <View style={[styles.sendIconWrapper, { backgroundColor: theme.colors.darkRed }]}>
-                  <SendIcon size={18} color={theme.colors.white} />
-                </View>
-              </Pressable>
-            ))}
+          {renderSend ? (
+            renderSend({ ...props, onSend: handleSend })
+          ) : (
+            <Pressable
+              onPress={text ? handleSend : null}
+              style={[styles.sendButton, text ? {} : { opacity: 0.5 }]}>
+              <View style={[styles.sendIconWrapper, { backgroundColor: theme.colors.darkRed }]}>
+                <SendIcon size={18} color={theme.colors.white} />
+              </View>
+            </Pressable>
+          )}
         </View>
       </View>
     </View>
@@ -254,15 +215,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   iconBtn: {
-    paddingHorizontal: 8,
+    paddingLeft: 8,
     paddingVertical: 8,
   },
   toggleBtn: {
-    marginRight: 2,
+    marginRight: appSize.width(4),
   },
   composerWrapper: {
     flex: 1,
-    marginLeft: 8,
+    marginLeft: 4,
   },
   rightActions: {
     marginLeft: 8,
@@ -271,7 +232,7 @@ const styles = StyleSheet.create({
   },
   sendButton: {
     paddingHorizontal: 8,
-    paddingVertical: 8,
+    paddingVertical: 4,
   },
   sendIconWrapper: {
     width: 36,

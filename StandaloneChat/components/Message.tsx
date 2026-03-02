@@ -312,7 +312,7 @@ const Message = (props: MessageProps) => {
             : undefined
         }
         closeOnBackdropPress
-        selectedReaction={myReaction}
+        // selectedReaction={myReaction}
         selectedOtherReaction={otherReaction}
         onReactionPress={handleReactionPress}
         onPress={handlePress}

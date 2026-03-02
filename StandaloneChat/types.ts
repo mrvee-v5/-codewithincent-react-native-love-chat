@@ -87,7 +87,7 @@ export interface ChatProps {
   onRemoveEmoji?: (message: IMessage, emoji: { emoji: string; userId?: string | number }) => void;
   onDeleteMessage?: (message: IMessage) => void;
   onDownloadFile?: (message: IMessage) => void;
-
+  renderListEmptyComponent?: () => React.ReactNode;
   // Behavior
   keyboardShouldPersistTaps?: 'always' | 'never' | 'handled';
   isTyping?: boolean;

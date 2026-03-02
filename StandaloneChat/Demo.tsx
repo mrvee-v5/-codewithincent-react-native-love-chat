@@ -1,9 +1,10 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { View, StyleSheet, Text, Alert, TouchableOpacity } from 'react-native';
 import { Chat, IMessage } from './index';
-import VideoCard from '../ChatScreen/media/VideoCard';
-import AudioCard from '../ChatScreen/media/AudioCard';
+
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import AudioCard from '../ChatScreen/media/AudioCard';
+import VideoCard from '../ChatScreen/media/VideoCard';
 
 const Demo = () => {
   const [messages, setMessages] = useState<IMessage[]>([]);
@@ -548,8 +549,14 @@ const Demo = () => {
         }
       : {};
 
-  const renderVideo = (p) => (
-    <VideoCard file={{ uri: p.video }} setFullScreen={p.setFullScreen} isFullScreen={p.isFullScreen} />
+  const renderVideo = (p: any) => (
+    <VideoCard
+      setFullScreen={p.setFullScreen}
+      isFullScreen={p.isFullScreen}
+      file={{
+        uri: p.video,
+      }}
+    />
   );
 
   return (
@@ -578,7 +585,7 @@ const Demo = () => {
         onDownloadFile={handleDownloadFile}
         renderMessageVideo={renderVideo}
         onRemoveEmoji={(emoji) => {}}
-        renderMessageAudio={(p) => <AudioCard uri={p.audio} />}
+        renderMessageAudio={(p) => <AudioCard uri={p.audio} isMine={p.user?.id === user.id} />}
         theme={demoTheme}
       />
     </View>

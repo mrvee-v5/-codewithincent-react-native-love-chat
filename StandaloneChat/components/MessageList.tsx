@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   FlatList,
+  Platform,
 } from 'react-native';
 import { IMessage, ChatProps } from '../types';
 import Message from './Message';
@@ -17,25 +18,36 @@ interface MessageListProps extends ChatProps {
   inverted?: boolean;
 }
 
-/**
- * A list component for rendering chat messages.
- * @param {MessageListProps} props - Props for rendering the message list.
- * @param {ChatProps} props - Props that are shared with the chat component.
- * @param {boolean} props.inverted - Whether the list should be inverted.
- * @param {boolean} props.loadEarlier - Whether the list should load earlier messages.
- * @param {() => void} props.onLoadEarlier - A callback function to load earlier messages.
- * @param {boolean} props.isLoadingEarlier - Whether the list is currently loading earlier messages.
- * @param {ViewStyle} props.contentContainerStyle - Styles for the content container.
- */
 const MessageList = (props: MessageListProps) => {
-  const { messages, user, onLoadEarlier, loadEarlier, isLoadingEarlier } = props;
-  const listRef = useRef<any>(null);
+  const { messages, user, onLoadEarlier, loadEarlier, isLoadingEarlier, inverted = true } = props;
+
+  const listRef = useRef<FlatList<IMessage>>(null);
   const theme = useTheme();
 
-  const listData = useMemo(() => {
+  /**
+   * Ensure stable array
+   */
+  const listData = useMemo<IMessage[]>(() => {
     return Array.isArray(messages) ? messages : [];
   }, [messages]);
 
+  /**
+   * Force scroll to bottom (Android fix)
+   */
+  const scrollToBottom = useCallback(() => {
+    if (!inverted) return;
+
+    requestAnimationFrame(() => {
+      listRef.current?.scrollToOffset({
+        offset: 0,
+        animated: false,
+      });
+    });
+  }, [inverted]);
+
+  /**
+   * Render Message
+   */
   const renderItem = useCallback(
     ({ item, index }: { item: IMessage; index: number }) => {
       const previousMessage = listData[index - 1];
@@ -53,14 +65,17 @@ const MessageList = (props: MessageListProps) => {
         return props.renderMessage(messageProps);
       }
 
-      const showDateHeader = shouldRenderDateHeader(item, previousMessage);
+      // 🔥 Correct compare for inverted list
+      const compareMessage = inverted ? nextMessage : previousMessage;
+
+      const showDateHeader = !compareMessage || !isSameDay(item, compareMessage);
 
       return (
         <View>
           {showDateHeader && (
             <View style={[styles.dateHeader, { backgroundColor: theme.colors.lightGrey }]}>
               <Text style={[styles.dateText, { color: theme.colors.gray }]}>
-                {new Date(item.createdAt).toLocaleDateString(undefined, {
+                {new Date(item.createdAt || Date.now()).toLocaleDateString(undefined, {
                   year: 'numeric',
                   month: 'short',
                   day: 'numeric',
@@ -68,21 +83,26 @@ const MessageList = (props: MessageListProps) => {
               </Text>
             </View>
           )}
+
           <Message {...messageProps} />
         </View>
       );
     },
-    [listData, user, props]
+    [listData, user, props, inverted, theme]
   );
 
-  const keyExtractor = useCallback((item: IMessage) => item.id.toString(), []);
+  /**
+   * Stable key extractor (prevents Android delay)
+   */
+  const keyExtractor = useCallback(
+    (item: IMessage, index: number) => (item?.id ? String(item.id) : `msg-${index}`),
+    []
+  );
 
   /**
-   * Renders a header that shows an activity indicator while earlier messages are being loaded
-   * or a button to load earlier messages when they are available.
-   * @returns {React.ReactElement} A JSX element that renders a header.
+   * Load earlier header
    */
-  const renderHeader = () => {
+  const renderHeader = useCallback(() => {
     if (!loadEarlier) return null;
 
     return (
@@ -98,7 +118,7 @@ const MessageList = (props: MessageListProps) => {
         )}
       </View>
     );
-  };
+  }, [loadEarlier, isLoadingEarlier, theme, onLoadEarlier]);
 
   return (
     <FlatList
@@ -107,37 +127,37 @@ const MessageList = (props: MessageListProps) => {
       data={listData}
       renderItem={renderItem}
       keyExtractor={keyExtractor}
-      inverted
-      contentContainerStyle={[styles.listContent, props.contentContainerStyle]}
+      inverted={inverted}
+      contentContainerStyle={[styles.listContent, { flexGrow: 1 }, props.contentContainerStyle]}
       ListFooterComponent={renderHeader}
-      keyboardShouldPersistTaps={props.keyboardShouldPersistTaps}
+      ListEmptyComponent={
+        props.renderListEmptyComponent ? (
+          <View style={[styles.emptyContainer, inverted ? styles.emptyFix : null]}>
+            {props.renderListEmptyComponent()}
+          </View>
+        ) : null
+      }
+      keyboardShouldPersistTaps="handled"
       onEndReached={loadEarlier ? onLoadEarlier : undefined}
       onEndReachedThreshold={0.1}
-      estimatedItemSize={72}
+      removeClippedSubviews={Platform.OS === 'android'}
+      onContentSizeChange={scrollToBottom} // 🔥 Android fix
       {...props.listViewProps}
     />
   );
 };
 
 /**
- * Returns true if the date header should be rendered for the current message.
- * A date header should be rendered if there is no previous message (i.e., the current message is the first in the list)
- * or if the current message was sent on a different day than the previous message.
- * @param currentMessage The current message.
- * @param previousMessage The previous message, or undefined if there is no previous message.
- * @returns True if the date header should be rendered, false otherwise.
+ * Date grouping helper
  */
-const shouldRenderDateHeader = (
-  currentMessage: IMessage,
-  previousMessage: IMessage | undefined
-) => {
-  if (!previousMessage) return true;
-  return !isSameDay(currentMessage, previousMessage);
+const shouldRenderDateHeader = (currentMessage: IMessage, compareMessage: IMessage | undefined) => {
+  if (!compareMessage) return true;
+  return !isSameDay(currentMessage, compareMessage);
 };
 
 const styles = StyleSheet.create({
   listContent: {
-    paddingVertical: defaultTheme.spacing.lg - 2,
+    paddingVertical: defaultTheme.spacing.lg,
     paddingHorizontal: defaultTheme.spacing.lg - 2,
   },
   dateHeader: {
@@ -159,6 +179,16 @@ const styles = StyleSheet.create({
   loadEarlierText: {
     fontWeight: '600',
   },
+  emptyContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: defaultTheme.spacing.lg - 2,
+    paddingHorizontal: defaultTheme.spacing.lg - 4,
+  },
+  emptyFix: {
+    transform: [{ scaleY: -1 }],
+  },
 });
 
-export default MessageList;
+export default React.memo(MessageList);
