@@ -19,8 +19,14 @@ const ReplyPreview = ({ replyTo }: ReplyPreviewProps) => {
   const caption = replyTo.caption || '';
   const text = replyTo.text || '';
 
+  /**
+   * Extracts the file name from a given URL.
+   * If the URL is undefined, an empty string, or does not contain a valid file name, returns undefined.
+   * Otherwise, returns the file name extracted from the URL.
+   * @param {string} url - The URL to extract the file name from.
+   * @returns {string | undefined} - The extracted file name, or undefined if the URL is invalid.
+   */
   const getFileNameFromUrl = (url?: string) => {
-    console.log('url', url);
     if (!url) return undefined;
     try {
       const clean = url.split('?')[0];
@@ -32,6 +38,12 @@ const ReplyPreview = ({ replyTo }: ReplyPreviewProps) => {
     }
   };
 
+  /**
+   * Returns the file extension from the given file name.
+   * If no extension is found, returns undefined.
+   * @param {string} [name] - The file name.
+   * @returns {string | undefined} - The extracted file extension, or undefined if no extension was found.
+   */
   const getExtension = (name?: string) => {
     if (!name) return undefined;
     const ext = name.split('.').pop();
@@ -47,6 +59,12 @@ const ReplyPreview = ({ replyTo }: ReplyPreviewProps) => {
   const isFile =
     !!computedFileName || fileType === 'audio' || fileType === 'file' || !!replyTo.audio;
 
+  /**
+   * Renders a preview of the message that is currently being replied to.
+   * If the message is a media message, renders the media thumbnail.
+   * If the message is a text message, renders the sender's name and the message text.
+   * @returns {React.ReactElement} - The rendered component.
+   */
   const renderMedia = () => (
     <View style={styles.mediaRow}>
       <View style={styles.textWrapper}>
@@ -75,6 +93,11 @@ const ReplyPreview = ({ replyTo }: ReplyPreviewProps) => {
     </View>
   );
 
+  /**
+   * Renders a file row with an icon and a file name.
+   * The icon is either an audio icon or a file icon, depending on the file type.
+   * The file name is either the computed file name or the file type (e.g. 'Audio' or 'File') if no file name is available.
+   */
   const renderFileRow = () => (
     <View style={styles.fileRow}>
       {fileType === 'audio' ||

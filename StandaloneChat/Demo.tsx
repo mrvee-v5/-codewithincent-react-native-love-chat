@@ -446,8 +446,6 @@ const Demo = () => {
   };
 
   const handleReaction = (msg: IMessage, reaction: string) => {
-    console.log('Reacted:', reaction, 'to msg:', msg.id);
-    // Update message with reaction logic here
     setMessages((prev) =>
       prev.map((m) => {
         if (m.id === msg.id) {
@@ -550,43 +548,37 @@ const Demo = () => {
         }
       : {};
 
-  const renderVideo = (p) => {
-    console.log('PPPPPPP =>', p);
-    return (
-      <VideoCard
-        file={{ uri: p.video }}
-        setFullScreen={p.setFullScreen}
-        isFullScreen={p.isFullScreen}
-      />
-    );
-  };
-  const { top, bottom } = useSafeAreaInsets();
+  const renderVideo = (p) => (
+    <VideoCard file={{ uri: p.video }} setFullScreen={p.setFullScreen} isFullScreen={p.isFullScreen} />
+  );
+
   return (
-    <View style={[styles.container, { paddingTop: top, paddingBottom: bottom + 10 }]}>
-      <View style={styles.topBar}>
-        <TouchableOpacity onPress={toggleTheme} style={styles.toggleButton}>
-          <Text style={styles.toggleText}>
-            {themeMode === 'light' ? 'Enable Dark Theme' : 'Disable Dark Theme'}
-          </Text>
-        </TouchableOpacity>
-      </View>
+    <View style={[styles.container]}>
       <Chat
         messages={messages}
+        renderChatHeader={() => (
+          <View style={styles.topBar}>
+            <TouchableOpacity onPress={toggleTheme} style={styles.toggleButton}>
+              <Text style={styles.toggleText}>
+                {themeMode === 'light' ? 'Enable Dark Theme' : 'Disable Dark Theme'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
         isLoadingEarlier
         loadEarlier
         onSend={onSend}
         user={user}
-        placeholder="Type a message..."
+        // isGroup
+
         onPressAttachment={handleAttachment}
         onReaction={handleReaction}
         renderUploadFooter={renderCustomUploadFooter}
         onDeleteMessage={handleDeleteMessage}
         onDownloadFile={handleDownloadFile}
         renderMessageVideo={renderVideo}
-        renderMessageAudio={(p) => {
-          console.log('PPPPPPP =>', JSON.stringify(p, null, 6));
-          return <AudioCard uri={p.audio} />;
-        }}
+        onRemoveEmoji={(emoji) => {}}
+        renderMessageAudio={(p) => <AudioCard uri={p.audio} />}
         theme={demoTheme}
       />
     </View>

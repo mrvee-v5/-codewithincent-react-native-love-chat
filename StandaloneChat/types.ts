@@ -52,6 +52,7 @@ export interface ChatProps {
   renderMessageImage?: (props: any) => React.ReactNode;
   renderMessageVideo?: (props: any) => React.ReactNode;
   renderMessageAudio?: (props: any) => React.ReactNode;
+  renderChatHeader?: () => React.ReactNode;
   renderChatFooter?: () => React.ReactNode;
   renderUploadFooter?: (props: any) => React.ReactNode;
   renderAttachmentButton?: (props: {
@@ -69,6 +70,14 @@ export interface ChatProps {
 
   // Input props
   textInputProps?: any;
+  renderInputLeftContent?: (props: any) => React.ReactNode;
+  renderToggleIcon?: (props: {
+    expanded: boolean;
+    onToggle: () => void;
+    rotateAnim: any;
+  }) => React.ReactNode;
+  enableToggleAnimation?: boolean;
+  rightInputContentWidth?: number;
 
   // Actions
   onPressAttachment?: (type: string) => void;

@@ -25,6 +25,8 @@ coverage/
 .expo/
 .expo-shared/
 .metro/
+android/
+ios/
 android/.gradle/
 android/build/
 android/app/build/

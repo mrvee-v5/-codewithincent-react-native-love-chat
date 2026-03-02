@@ -71,34 +71,24 @@ export default function ChatScreen() {
 
 ## API Reference
 
-For the exhaustive, parameter-by-parameter documentation, see the full API guide:
+This section summarizes the most important types and props. For the full, in-depth guide, see
+[docs/API.md](./docs/API.md), which is shipped with the npm package.
 
-- Full API (latest): https://unpkg.com/@codewithvincent/react-native-love-chat@latest/docs/API.md
+### Core Types
 
-The link above points to the docs file shipped in the npm package, ensuring it’s always in sync with the published version.
+#### `IUser`
 
-### Essential Props
+```ts
+interface IUser {
+  id: string | number;
+  name?: string;
+  avatar?: string | number;
+}
+```
 
-- messages: IMessage[] — array of messages (newest first if inverted)
-- user: IUser — current user object
-- onSend: (messages: IMessage[]) => void — send handler
-- placeholder?: string
-- isTyping?: boolean
-- loadEarlier?: boolean
-- isLoadingEarlier?: boolean
-- onLoadEarlier?: () => void
-- onPressAttachment?: (type: string) => void
-- onReaction?: (msg: IMessage, emoji: string) => void
-- onDeleteMessage?: (msg: IMessage) => void
-- onDownloadFile?: (msg: IMessage) => void
-- renderUploadFooter?: (props) => ReactNode
-- theme?: PartialTheme — to override default theme colors
+#### `IMessage`
 
-## Data Structures
-
-### IMessage
-
-```typescript
+```ts
 interface IMessage {
   id: string | number;
   text: string;
@@ -111,19 +101,95 @@ interface IMessage {
   sent?: boolean;
   received?: boolean;
   pending?: boolean;
-  // ... custom fields
+  quickReplies?: any;
+  caption?: string;
+  fileName?: string;
+  fileType?: string;
+  fileUrl?: string;
+  replyTo?: IMessage;
+  reactions?: Array<{ userId: string | number; emoji: string }>;
+  status?: 'pending' | 'sent' | 'delivered' | 'read';
+  isMine?: boolean;
 }
 ```
 
-### IUser
+### `Chat` Props (high level)
 
-```typescript
-interface IUser {
-  id: string | number;
-  name?: string;
-  avatar?: string | number;
+```ts
+interface ChatProps {
+  messages: IMessage[];
+  user: IUser;
+  onSend: (messages: IMessage[]) => void;
+  participants?: IUser[];
+  placeholder?: string;
+  text?: string;
+  onInputTextChanged?: (text: string) => void;
+
+  // Rendering overrides
+  renderBubble?: (props: any) => React.ReactNode;
+  renderInputToolbar?: (props: any) => React.ReactNode;
+  renderComposer?: (props: any) => React.ReactNode;
+  renderSend?: (props: any) => React.ReactNode;
+  renderInputLeftContent?: (props: any) => React.ReactNode;
+  renderToggleIcon?: (props: {
+    expanded: boolean;
+    onToggle: () => void;
+    rotateAnim: any;
+  }) => React.ReactNode;
+  renderMessage?: (props: any) => React.ReactNode;
+  renderMessageText?: (props: any) => React.ReactNode;
+  renderMessageImage?: (props: any) => React.ReactNode;
+  renderMessageVideo?: (props: any) => React.ReactNode;
+  renderMessageAudio?: (props: any) => React.ReactNode;
+  renderChatHeader?: () => React.ReactNode;
+  renderChatFooter?: () => React.ReactNode;
+  renderUploadFooter?: (props: any) => React.ReactNode;
+  renderAttachmentButton?: (props: {
+    toggle: () => void;
+    showing: boolean;
+    onPressAttachment?: (type: string) => void;
+    theme: any;
+  }) => React.ReactNode;
+
+  // List behavior
+  loadEarlier?: boolean;
+  onLoadEarlier?: () => void;
+  isLoadingEarlier?: boolean;
+  listViewProps?: any;
+
+  // Input behavior
+  textInputProps?: any;
+  enableToggleAnimation?: boolean;
+  rightInputContentWidth?: number;
+
+  // Actions
+  onPressAttachment?: (type: string) => void;
+  onReply?: (message: IMessage) => void;
+  onClearReply?: () => void;
+  onReaction?: (message: IMessage, reaction: string) => void;
+  onRemoveEmoji?: (message: IMessage, emoji: { emoji: string; userId?: string | number }) => void;
+  onDeleteMessage?: (message: IMessage) => void;
+  onDownloadFile?: (message: IMessage) => void;
+
+  // Behavior
+  keyboardShouldPersistTaps?: 'always' | 'never' | 'handled';
+  isTyping?: boolean;
+  isGroup?: boolean;
+
+  // Style
+  theme?: PartialTheme;
+  containerStyle?: any;
+  messagesContainerStyle?: any;
 }
 ```
+
+Common callbacks you will typically use:
+
+- `onSend(messages)` — append or prepend messages to your state.
+- `onReaction(message, emoji)` — apply a reaction to a message.
+- `onPressAttachment(type)` — open your own media picker; `type` is whatever you choose.
+- `onDeleteMessage(message)` — remove the message from your data store.
+- `onDownloadFile(message)` — handle file download logic.
 
 ## Theming
 

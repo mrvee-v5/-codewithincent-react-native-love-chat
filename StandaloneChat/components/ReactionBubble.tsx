@@ -136,6 +136,42 @@ export type ReactionBubbleProps = {
   onRemoveEmoji?: (emoji: { emoji: string; userId?: string | number }) => void;
 };
 
+/**
+ * A bubble that shows a list of reactions to a message.
+ *
+ * If the reactions come from a group, the bubble will show
+ * the total count of each reaction as well as the users who reacted with it.
+ *
+ * The bubble is a pressable component that will close when pressed outside of it.
+ *
+ * It also has a close button that can be pressed to close it.
+ *
+ * The bubble will also have a "more" button that will show the reactions
+ * details when pressed.
+ * The "more" button will show a bottom sheet with the reactions details.
+ *
+ * The bottom sheet will have a header with the count of reactions and a list of users
+ * who reacted with it.
+ *
+ * The bottom sheet will also have a close button that can be pressed to close it.
+ *
+ * @param {Object} props - The props for the ReactionBubble component.
+ * @param {string} props.reactions - The list of reactions to a message.
+ * @param {boolean} props.isMine - Whether the message is from the same user as the one viewing it.
+ * @param {string} props.selectedReaction - The currently selected reaction.
+ * @param {string} props.selectedOtherReaction - The currently selected other reaction.
+ * @param {function} props.onReactionPress - The function to call when a reaction is pressed.
+ * @param {function} props.onRemoveEmoji - The function to call when a user removes their own reaction.
+ * @param {boolean} props.closeOnBackdropPress - Whether the bubble should close when the backdrop is pressed.
+ * @param {boolean} props.showGroupModal - Whether to show the reactions details bottom sheet.
+ * @param {function} props.setShowGroupModal - The function to call when the showGroupModal state should change.
+ * @param {boolean} props.removing - Whether a user is currently removing their own reaction.
+ * @param {function} props.setRemoving - The function to call when the removing state should change.
+ * @param {string} props.highlightColor - The color to highlight the currently selected reaction with.
+ * @param {string} props.reactionStyle - The style to apply to the reactions.
+ * @param {string} props.bubbleStyle - The style to apply to the bubble.
+ * @param {string} props.miniReactionStyle - The style to apply to the mini reaction bubbles.
+ */
 export default function ReactionBubble({
   reactions,
   selectedReaction,
@@ -182,6 +218,14 @@ export default function ReactionBubble({
     ],
   }));
 
+  /**
+   * Shows the reaction popup at the given position.
+   * @param {Object} pos - The position of the popup to show.
+   * @param {number} pos.x - The x-coordinate of the position.
+   * @param {number} pos.y - The y-coordinate of the position.
+   * @param {number} pos.width - The width of the position.
+   * @param {number} pos.height - The height of the position.
+   */
   const showPopup = (pos: { x: number; y: number; width: number; height: number }) => {
     hidePopup();
     scale.value = 0;
@@ -286,7 +330,21 @@ export default function ReactionBubble({
                 animStyle,
               ]}>
               {reactions.map((r, i) => (
-                <Pressable key={i} onPress={() => handleReactionPress(r)}>
+                <Pressable
+                  key={i}
+                  onPress={() => {
+                    // If not group and user already reacted with this emoji, remove it
+                    if (!isGroup && hasUserEmoji(messageReactions || [], userId, r)) {
+                      hidePopup();
+                      if (onRemoveEmoji) {
+                        onRemoveEmoji({ emoji: r, userId });
+                      } else {
+                        onReactionPress(undefined);
+                      }
+                      return;
+                    }
+                    handleReactionPress(r);
+                  }}>
                   <Text style={[styles.reaction, reactionStyle]}>{r}</Text>
                 </Pressable>
               ))}
@@ -303,7 +361,7 @@ export default function ReactionBubble({
                 top: menuTop,
                 left: menuLeft,
                 width: menuWidth,
-                backgroundColor: theme.colors.reactionMenuBg,
+                backgroundColor: theme.colors.reactionPopupBg,
               },
             ]}>
             {onReply && (
@@ -355,6 +413,9 @@ export default function ReactionBubble({
     });
   };
 
+  /**
+   * Destroys the context menu popup and sets the sibling ref to null.
+   */
   const hidePopup = () => {
     if (siblingRef.current) {
       siblingRef.current.destroy();
@@ -362,6 +423,12 @@ export default function ReactionBubble({
     }
   };
 
+  /**
+   * Handles long press on the trigger element.
+   * Measures the position of the trigger element in the window,
+   * and shows the context menu popup at that position.
+   * If onLongPress is defined, calls onLongPress after showing the popup.
+   */
   const handleLongPress = () => {
     const node = findNodeHandle(triggerRef.current);
     if (!node) return;
@@ -375,6 +442,10 @@ export default function ReactionBubble({
     }
   };
 
+  /**
+   * Hides the context menu popup and calls onReactionPress with the given reaction string.
+   * @param {string} reaction - The reaction string to pass to onReactionPress.
+   */
   const handleReactionPress = (reaction: string) => {
     hidePopup();
     onReactionPress(reaction);
@@ -422,7 +493,7 @@ export default function ReactionBubble({
       )}
       {isGroup && messageReactions && messageReactions.length > 0 && (
         <View style={{ alignItems: isMine ? 'flex-end' : 'flex-start' }}>
-          <View style={[styles.groupCard, { backgroundColor: theme.colors.reactionMenuBg }]}>
+          <View style={[styles.groupCard, { backgroundColor: theme.colors.reactionPopupBg }]}>
             <View style={styles.groupCardContent}>
               {aggregateGrouped(messageReactions).map((ar, idx) => (
                 <Pressable
@@ -463,7 +534,7 @@ export default function ReactionBubble({
           style={[
             styles.bottomSheet,
             {
-              backgroundColor: theme.colors.bgModal,
+              backgroundColor: theme.colors.reactionPopupBg,
               borderTopColor: theme.colors.borderDefault,
               shadowColor: theme.colors.black,
             },
@@ -471,7 +542,7 @@ export default function ReactionBubble({
           accessibilityLabel="Reactions details"
           accessible>
           <View style={styles.sheetHeader}>
-            <Text style={[styles.sheetTitle, { color: theme.colors.textPrimary }]}>
+            <Text style={[styles.sheetTitle, { color: theme.colors.textOnOverlay }]}>
               {countForEmoji(messageReactions || [], selectedEmoji || '')} Reactions
             </Text>
           </View>
@@ -498,7 +569,6 @@ export default function ReactionBubble({
                 key={`user-${u.id}-${idx}`}
                 style={[styles.userRow, !canRemoveOwn(u.id, userId) ? { opacity: 0.6 } : null]}
                 onPress={() => {
-                  if (!selectedEmoji) return;
                   if (!canRemoveOwn(u.id, userId) || removing) return;
                   setRemoving(true);
                   try {
@@ -546,6 +616,13 @@ export default function ReactionBubble({
   );
 }
 
+/**
+ * Aggregates reactions by emoji, counting the number of unique users
+ * who used each emoji.
+ * @param {Array<{ userId: string | number; emoji: string }>} reactions
+ * @returns {Array<{ emoji: string; count: number }>} An array of objects containing
+ * the emoji and the number of unique users who used it, sorted by count in descending order.
+ */
 export const aggregateGrouped = (reactions: Array<{ userId: string | number; emoji: string }>) => {
   const map = new Map<string, Set<string | number>>();
   for (let i = 0; i < reactions.length; i++) {
@@ -559,6 +636,12 @@ export const aggregateGrouped = (reactions: Array<{ userId: string | number; emo
     .sort((a, b) => (b.count === a.count ? a.emoji.localeCompare(b.emoji) : b.count - a.count));
 };
 
+/**
+ * Returns the total count of all unique emojis in the given
+ * reactions array, after aggregating the reactions by emoji.
+ * @param {Array<{ userId: string | number; emoji: string }>} reactions
+ * @returns {number} Total count of all unique emojis.
+ */
 const totalAggregatedCount = (reactions: Array<{ userId: string | number; emoji: string }>) => {
   const agg = aggregateGrouped(reactions);
   let sum = 0;
@@ -566,10 +649,23 @@ const totalAggregatedCount = (reactions: Array<{ userId: string | number; emoji:
   return sum;
 };
 
+/**
+ * Returns true if the given value opt-in to close the modal
+ * when the backdrop is pressed.
+ * @param {boolean} [v] The value to check. If undefined, returns false.
+ * @returns {boolean} Whether to close the modal on backdrop press.
+ */
 export function shouldCloseOnBackdropPress(v?: boolean) {
   return !!v;
 }
 
+/**
+ * Checks if a user has reacted with a given emoji.
+ * @param {Array<{ userId: string | number; emoji: string }>} reactions The reactions to check.
+ * @param {string | number} [userId] The user ID to check.
+ * @param {string} [emoji] The emoji to check.
+ * @returns {boolean} Whether the user has reacted with the given emoji.
+ */
 export const hasUserEmoji = (
   reactions: Array<{ userId: string | number; emoji: string }>,
   userId?: string | number,
@@ -583,11 +679,34 @@ export const hasUserEmoji = (
   }
   return false;
 };
+/**
+ * Returns true if the current user can remove the reaction of the target user.
+ * This is only possible if the target user is the same as the current user.
+ * @param {string | number} [targetUserId] The user ID of the target user.
+ * @param {string | number} [currentUserId] The user ID of the current user.
+ * @returns {boolean} Whether the current user can remove the reaction of the target user.
+ */
 
+/**
+ * Checks if the current user can remove the reaction of the target user.
+ * This is only possible if the target user is the same as the current user.
+ * @param {string | number} [targetUserId] The user ID of the target user.
+ * @param {string | number} [currentUserId] The user ID of the current user.
+ * @returns {boolean} Whether the current user can remove the reaction of the target user.
+ */
 export const canRemoveOwn = (targetUserId?: string | number, currentUserId?: string | number) => {
   if (!currentUserId) return false;
   return targetUserId === currentUserId;
 };
+/**
+ * Returns a list of users who have reacted with the given emoji.
+ * The list contains user objects from the given participants array if they exist,
+ * otherwise it contains objects with only the 'id' property.
+ * @param {Array<{ userId: string | number; emoji: string }>} reactions The reactions to check.
+ * @param {Array<{ id: string | number; name?: string; avatar?: string | number; phone?: string; }>} participants The participants to check.
+ * @param {string} emoji The emoji to check.
+ * @returns {Array<any>} A list of users who have reacted with the given emoji.
+ */
 export const usersForEmoji = (
   reactions: Array<{ userId: string | number; emoji: string }>,
   participants: Array<{
@@ -617,6 +736,12 @@ export const usersForEmoji = (
   return list;
 };
 
+/**
+ * Returns the count of reactions for the given emoji.
+ * @param {Array<{ userId: string | number; emoji: string }>} reactions The reactions to count.
+ * @param {string} emoji The emoji to count reactions for.
+ * @returns {number} The count of reactions for the given emoji.
+ */
 export const countForEmoji = (
   reactions: Array<{ userId: string | number; emoji: string }>,
   emoji: string

@@ -18,10 +18,10 @@ export const defaultTheme = {
     lightGrey: '#f8f8f8',
     softGray: '#fafafa',
     borderGray: '#eee',
-    textGray: '#eee',
+    textGray: '#666',
     softRed: '#fff7f7',
     verySoftGray: '#f9f9f9',
-    timestamp: '#8b8b8b',
+    timestamp: '#666',
     ownMessageBubble: '#EB5757',
     otherMessageBubble: '#f9f9f9',
     ownMessageText: '#fff',
@@ -44,16 +44,16 @@ export const defaultTheme = {
     mediumGray: '#666',
     blurFallback: '#000000CC',
     // Semantic aliases for easier theming
-    bgApp: '#000',
-    bgModal: '#000',
+    bgApp: '#fff',
+    bgModal: '#fff',
     surfaceCard: '#f8f8f8',
     surfaceBubbleOutgoing: '#EB5757',
     surfaceBubbleIncoming: '#f9f9f9',
-    textPrimary: '#000',
-    textSecondary: '#999',
+    textPrimary: '#111',
+    textSecondary: '#666',
     textInverse: '#fff',
     textGroupHeader: '#8b8b8b',
-    textTimestamp: '#8b8b8b',
+    textTimestamp: '#666',
     textTimestampMine: 'rgba(255, 255, 255, 0.7)',
     textOnBubbleOutgoing: '#fff',
     textOnBubbleIncoming: '#000',
@@ -101,6 +101,14 @@ const ThemeContext = createContext<Theme>(defaultTheme);
 
 export const useTheme = () => useContext(ThemeContext);
 
+/**
+ * ThemeProvider component wraps children with a ThemeContext.Provider.
+ * It takes an optional `theme` prop of type `PartialTheme` and merges it with the default theme.
+ * The merged theme is then passed to the ThemeContext.Provider.
+ * @param {PartialTheme} [theme] - Optional partial theme to merge with the default theme.
+ * @param {React.ReactNode} children - React children to wrap with the ThemeContext.Provider.
+ * @returns {JSX.Element} - ThemeContext.Provider wrapping the children.
+ */
 export const ThemeProvider = ({
   theme,
   children,

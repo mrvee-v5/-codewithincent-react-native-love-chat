@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'rea
 import { FlashList } from '@shopify/flash-list';
 import { IMessage, ChatProps } from '../types';
 import Message from './Message';
-import { isSameDay, sortByDate } from '../utils';
+import { isSameDay } from '../utils';
 import { defaultTheme, useTheme } from '../utils/theme';
 
 interface MessageListProps extends ChatProps {
@@ -11,6 +11,16 @@ interface MessageListProps extends ChatProps {
   inverted?: boolean;
 }
 
+/**
+ * A list component for rendering chat messages.
+ * @param {MessageListProps} props - Props for rendering the message list.
+ * @param {ChatProps} props - Props that are shared with the chat component.
+ * @param {boolean} props.inverted - Whether the list should be inverted.
+ * @param {boolean} props.loadEarlier - Whether the list should load earlier messages.
+ * @param {() => void} props.onLoadEarlier - A callback function to load earlier messages.
+ * @param {boolean} props.isLoadingEarlier - Whether the list is currently loading earlier messages.
+ * @param {ViewStyle} props.contentContainerStyle - Styles for the content container.
+ */
 const MessageList = (props: MessageListProps) => {
   const { messages, user, onLoadEarlier, loadEarlier, isLoadingEarlier } = props;
   const listRef = useRef<any>(null);
@@ -61,6 +71,11 @@ const MessageList = (props: MessageListProps) => {
 
   const keyExtractor = useCallback((item: IMessage) => item.id.toString(), []);
 
+  /**
+   * Renders a header that shows an activity indicator while earlier messages are being loaded
+   * or a button to load earlier messages when they are available.
+   * @returns {React.ReactElement} A JSX element that renders a header.
+   */
   const renderHeader = () => {
     if (!loadEarlier) return null;
 
@@ -102,6 +117,14 @@ const MessageList = (props: MessageListProps) => {
   );
 };
 
+/**
+ * Returns true if the date header should be rendered for the current message.
+ * A date header should be rendered if there is no previous message (i.e., the current message is the first in the list)
+ * or if the current message was sent on a different day than the previous message.
+ * @param currentMessage The current message.
+ * @param previousMessage The previous message, or undefined if there is no previous message.
+ * @returns True if the date header should be rendered, false otherwise.
+ */
 const shouldRenderDateHeader = (
   currentMessage: IMessage,
   previousMessage: IMessage | undefined

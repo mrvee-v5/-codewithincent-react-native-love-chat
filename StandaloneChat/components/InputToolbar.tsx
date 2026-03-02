@@ -1,9 +1,8 @@
-import React, { useRef, useState, useEffect } from 'react';
-import { View, StyleSheet, Pressable, Animated, Keyboard, Platform } from 'react-native';
+import React, { useState, useRef } from 'react';
+import { View, StyleSheet, Pressable, Animated, Easing } from 'react-native';
 import Composer from './Composer';
-import { defaultTheme, useTheme } from '../utils/theme';
-import { PlusIcon, SendIcon } from './Icons';
-import UploadFooter from './UploadFooter';
+import { useTheme } from '../utils/theme';
+import { SendIcon, ImageIcon, VideoIcon, MicIcon, ChevronDownIcon } from './Icons';
 import FooterReplyPreview from './FooterReplyPreview';
 import { IMessage } from '../types';
 
@@ -13,94 +12,148 @@ interface InputToolbarProps {
   onTextChanged?: (text: string) => void;
   renderComposer?: (props: any) => React.ReactNode;
   renderSend?: (props: any) => React.ReactNode;
+  renderToggleIcon?: (props: {
+    expanded: boolean;
+    onToggle: () => void;
+    rotateAnim: Animated.Value;
+  }) => React.ReactNode;
   user: any;
   placeholder?: string;
   onPressAttachment?: (type: string) => void;
   replyMessage?: IMessage | null;
   onClearReply?: () => void;
   renderUploadFooter?: (props: any) => React.ReactNode;
-  renderAttachmentButton?: (props: {
-    toggle: () => void;
-    showing: boolean;
-    onPressAttachment?: (type: string) => void;
-    theme: any;
-  }) => React.ReactNode;
+  enableToggleAnimation?: boolean;
+  renderInputLeftContent?: (props: any) => React.ReactNode;
+  rightInputContentWidth?: number;
 }
 
+/**
+ * Component to render the input toolbar with the given props.
+ * @param props {Object} - props to pass to the InputToolbar component
+ * @returns {ReactElement} - the rendered InputToolbar component
+ */
 const InputToolbar = (props: InputToolbarProps) => {
+  const ICONS_WIDTH = props.rightInputContentWidth || 110;
   const theme = useTheme();
   const {
     onSend,
     text,
-    renderComposer,
-    renderSend,
     user,
     onPressAttachment,
     replyMessage,
     onClearReply,
+    renderComposer,
+    renderSend,
     renderUploadFooter,
-    renderAttachmentButton,
+    renderToggleIcon,
+    enableToggleAnimation = true,
     ...rest
   } = props;
 
-  const [showUploadFooter, setShowUploadFooter] = useState(false);
-  const [keyboardHeight] = useState(new Animated.Value(0));
+  const [isFocused, setIsFocused] = useState(false);
 
-  useEffect(() => {
-    const showSub = Keyboard.addListener(
-      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
-      (e) => {
-        Animated.timing(keyboardHeight, {
-          toValue: e.endCoordinates.height,
-          duration: e.duration || 250,
-          useNativeDriver: false,
-        }).start();
-        setShowUploadFooter(false);
-      }
-    );
-    const hideSub = Keyboard.addListener(
-      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
-      (e) => {
-        Animated.timing(keyboardHeight, {
-          toValue: 0,
-          duration: e.duration || 250,
-          useNativeDriver: false,
-        }).start();
-      }
-    );
-    return () => {
-      showSub.remove();
-      hideSub.remove();
-    };
-  }, []);
+  // Animated values drive the attachment icons row and the optional toggle rotation
+  const iconsAnim = useRef(new Animated.Value(1)).current;
+  const rotateAnim = useRef(new Animated.Value(0)).current;
 
+  // Fades and resizes the attachment icons row when the input expands/collapses
+  const animateIcons = (show: boolean) => {
+    Animated.timing(iconsAnim, {
+      toValue: show ? 1 : 0,
+      duration: 250,
+      easing: Easing.out(Easing.ease),
+      useNativeDriver: false,
+    }).start();
+  };
+
+  /**
+   * Animates the toggle icon to rotate when the input expands/collapses.
+   * @param {boolean} expanded - whether the input is expanded or not
+   */
+  const animateToggleIcon = (expanded: boolean) => {
+    if (!enableToggleAnimation) {
+      return;
+    }
+    Animated.timing(rotateAnim, {
+      toValue: expanded ? 1 : 0,
+      duration: 250,
+      easing: Easing.inOut(Easing.ease),
+      useNativeDriver: true,
+    }).start();
+  };
+
+  /**
+   * Called when the input field gains focus.
+   * Sets the isFocused state to true, animates the attachment icons row to hide,
+   * and animates the toggle icon to rotate.
+   */
+  const handleFocus = () => {
+    setIsFocused(true);
+    animateIcons(false);
+    animateToggleIcon(true);
+  };
+
+  /**
+   * Called when the input field loses focus.
+   * Sets the isFocused state to false, animates the attachment icons row to show,
+   * and animates the toggle icon to its original state.
+   */
+  const handleBlur = () => {
+    if (!text || text.trim().length === 0) {
+      setIsFocused(false);
+      animateIcons(true);
+      animateToggleIcon(false);
+    }
+  };
+
+  /**
+   * Handles sending a message. If the input field contains text, it trims the text,
+   * creates a new message object, calls the onSend callback with the message,
+   * and clears the reply message.
+   */
   const handleSend = () => {
     if (text && text.trim().length > 0) {
       const message = {
-        id: Math.round(Math.random() * 1000000),
+        id: Math.random().toString(),
         text: text.trim(),
         createdAt: new Date(),
-        user: user,
+        user,
         replyTo: replyMessage,
       };
+
       onSend?.([message]);
       onClearReply?.();
     }
   };
 
-  const toggleUploadFooter = () => {
-    if (showUploadFooter) {
-      setShowUploadFooter(false);
-      Keyboard.dismiss();
-    } else {
-      setShowUploadFooter(true);
-      Keyboard.dismiss();
-    }
+  const hasText = !!text && text.trim().length > 0;
+
+  const animatedWidth = iconsAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, ICONS_WIDTH],
+  });
+  const rotateStyle = {
+    transform: [
+      {
+        rotate: rotateAnim.interpolate({
+          inputRange: [0, 1],
+          outputRange: ['0deg', '180deg'],
+        }),
+      },
+    ],
   };
 
-  const handleActionPress = (type: string) => {
-    onPressAttachment?.(type);
-    setShowUploadFooter(false);
+  /**
+   * Toggles the input field between expanded and collapsed states.
+   * If the input field is currently expanded, it will collapse and hide the attachment icons row.
+   * If the input field is currently collapsed, it will expand and show the attachment icons row.
+   */
+  const handleTogglePress = () => {
+    const next = !isFocused;
+    setIsFocused(next);
+    animateIcons(!next);
+    animateToggleIcon(next);
   };
 
   return (
@@ -112,66 +165,78 @@ const InputToolbar = (props: InputToolbarProps) => {
       <View
         style={[
           styles.container,
-          { borderTopColor: theme.colors.borderGray, backgroundColor: theme.colors.white },
+          {
+            borderTopColor: theme.colors.borderGray,
+            backgroundColor: theme.colors.white,
+          },
         ]}>
-        {renderAttachmentButton ? (
-          renderAttachmentButton({
-            toggle: toggleUploadFooter,
-            showing: showUploadFooter,
-            onPressAttachment,
-            theme,
-          })
+        {renderToggleIcon ? (
+          renderToggleIcon({ expanded: isFocused, onToggle: handleTogglePress, rotateAnim })
         ) : (
-          <Pressable
-            onPress={toggleUploadFooter}
-            style={styles.addButton}
-            accessibilityRole="button"
-            accessibilityLabel="Open attachments">
-            <PlusIcon size={24} color={theme.colors.darkRed} />
+          <Pressable onPress={handleTogglePress} style={[styles.iconBtn, styles.toggleBtn]}>
+            <Animated.View style={rotateStyle}>
+              <ChevronDownIcon size={20} color={theme.colors.mediumGray} />
+            </Animated.View>
           </Pressable>
         )}
 
-        {renderComposer ? (
-          renderComposer(props)
-        ) : (
-          <Composer
-            {...rest}
-            text={text}
-            onSend={handleSend}
-            textInputProps={{
-              onFocus: () => setShowUploadFooter(false),
-            }}
-          />
-        )}
-
-        {renderSend ? (
-          renderSend({ ...props, onSend: handleSend })
-        ) : (
-          <Pressable
-            onPress={handleSend}
-            style={styles.sendButton}
-            disabled={!text || text.trim().length === 0}>
-            <View
-              style={[
-                styles.sendIconWrapper,
-                { backgroundColor: theme.colors.darkRed },
-                (!text || text.trim().length === 0) && { backgroundColor: theme.colors.gray },
-              ]}>
-              <SendIcon size={18} color={theme.colors.white} />
+        <Animated.View
+          style={[
+            {
+              width: animatedWidth,
+              opacity: iconsAnim,
+              overflow: 'hidden',
+            },
+          ]}>
+          {props.renderInputLeftContent ? (
+            props.renderInputLeftContent(props)
+          ) : (
+            <View style={styles.toolsRow}>
+              <Pressable onPress={() => onPressAttachment?.('Image')} style={styles.iconBtn}>
+                <ImageIcon size={22} color={theme.colors.darkRed} />
+              </Pressable>
+              <Pressable onPress={() => onPressAttachment?.('Video')} style={styles.iconBtn}>
+                <VideoIcon size={22} color={theme.colors.darkRed} />
+              </Pressable>
+              <Pressable onPress={() => onPressAttachment?.('Audio')} style={styles.iconBtn}>
+                <MicIcon size={22} color={theme.colors.darkRed} />
+              </Pressable>
             </View>
-          </Pressable>
-        )}
-      </View>
+          )}
+        </Animated.View>
 
-      {showUploadFooter &&
-        (renderUploadFooter ? (
-          renderUploadFooter({
-            onActionPress: handleActionPress,
-            theme,
-          })
-        ) : (
-          <UploadFooter onActionPress={handleActionPress} />
-        ))}
+        {/* Composer */}
+        <View style={styles.composerWrapper}>
+          {renderComposer ? (
+            renderComposer(props)
+          ) : (
+            <Composer
+              {...rest}
+              text={text}
+              onSend={handleSend}
+              textInputProps={{
+                multiline: true,
+                onFocus: handleFocus,
+                onBlur: handleBlur,
+              }}
+            />
+          )}
+        </View>
+
+        {/* Send */}
+        <View style={styles.rightActions}>
+          {hasText &&
+            (renderSend ? (
+              renderSend({ ...props, onSend: handleSend })
+            ) : (
+              <Pressable onPress={handleSend} style={styles.sendButton}>
+                <View style={[styles.sendIconWrapper, { backgroundColor: theme.colors.darkRed }]}>
+                  <SendIcon size={18} color={theme.colors.white} />
+                </View>
+              </Pressable>
+            ))}
+        </View>
+      </View>
     </View>
   );
 };
@@ -179,37 +244,41 @@ const InputToolbar = (props: InputToolbarProps) => {
 const styles = StyleSheet.create({
   container: {
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: defaultTheme.colors.borderGray,
-    backgroundColor: defaultTheme.colors.white,
     flexDirection: 'row',
     alignItems: 'flex-end',
     paddingVertical: 6,
     paddingHorizontal: 8,
   },
-  addButton: {
-    paddingHorizontal: 8,
-    paddingVertical: 10,
-    justifyContent: 'center',
+  toolsRow: {
+    flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 0,
+  },
+  iconBtn: {
+    paddingHorizontal: 8,
+    paddingVertical: 8,
+  },
+  toggleBtn: {
+    marginRight: 2,
+  },
+  composerWrapper: {
+    flex: 1,
+    marginLeft: 8,
+  },
+  rightActions: {
+    marginLeft: 8,
+    justifyContent: 'flex-end',
+    alignItems: 'center',
   },
   sendButton: {
     paddingHorizontal: 8,
-    paddingVertical: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 0,
+    paddingVertical: 8,
   },
   sendIconWrapper: {
-    backgroundColor: defaultTheme.colors.darkRed,
     width: 36,
     height: 36,
     borderRadius: 18,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  disabledSendWrapper: {
-    backgroundColor: defaultTheme.colors.gray,
   },
 });
 

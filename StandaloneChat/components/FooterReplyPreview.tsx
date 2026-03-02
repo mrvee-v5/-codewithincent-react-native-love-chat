@@ -10,6 +10,14 @@ interface FooterReplyPreviewProps {
   userId: string;
 }
 
+/**
+ * FooterReplyPreview is a component that renders a preview of the message that is currently being replied to.
+ * It displays the sender's name, the message text or media, and an 'X' button to clear the reply.
+ * It is used in the InputToolbar component.
+ *
+ * @param {FooterReplyPreviewProps} props - The props object containing the message to be replied to, the function to clear the reply, and the user ID.
+ * @returns {React.ReactElement} - The rendered component.
+ */
 const FooterReplyPreview = ({ chatMessage, clearReply, userId }: FooterReplyPreviewProps) => {
   const theme = useTheme();
   if (!chatMessage) return null;
@@ -17,6 +25,13 @@ const FooterReplyPreview = ({ chatMessage, clearReply, userId }: FooterReplyPrev
   const isMine = chatMessage.user?.id === userId;
   const senderName = isMine ? 'You' : chatMessage.user?.name || 'Unknown';
 
+  /**
+   * Extracts the file name from a given URL.
+   * If the URL is undefined, an empty string, or does not contain a valid file name, returns undefined.
+   * Otherwise, returns the file name extracted from the URL.
+   * @param {string} url - The URL to extract the file name from.
+   * @returns {string | undefined} - The extracted file name, or undefined if the URL is invalid.
+   */
   const getFileNameFromUrl = (url?: string) => {
     if (!url) return undefined;
     try {

@@ -16,7 +16,8 @@ import ReplyPreview from './ReplyPreview';
 import ImageCard from './media/ImageCard';
 import FileCard from './media/FileCard';
 import ReactionBubble from './ReactionBubble';
-
+import VideoWrapper from './media/VideoGroupWrapper';
+import GroupUserCard from './group/GroupUserCard';
 interface MessageProps {
   currentMessage: IMessage;
   nextMessage?: IMessage;
@@ -74,10 +75,21 @@ const Message = (props: MessageProps) => {
     minute: '2-digit',
   });
 
+  /**
+   * Handles long press on a message.
+   * Calls onLongPress callback if it exists.
+   * @param {void} - No parameters required.
+   */
   const handleLongPress = () => {
     onLongPress?.(null, currentMessage);
   };
 
+  /**
+   * Handles press on a message.
+   * Calls onPress callback if it exists.
+   * Toggles full screen for images and shows video player for videos.
+   * @param {void} - No parameters required.
+   */
   const handlePress = () => {
     onPress?.(null, currentMessage);
 
@@ -94,6 +106,11 @@ const Message = (props: MessageProps) => {
     }
   };
 
+  /**
+   * Handles a reaction press event.
+   * Calls the onReaction callback if it exists with the current message and the pressed reaction.
+   * @param {string | undefined} reaction - The pressed reaction, or undefined if no reaction was pressed.
+   */
   const handleReactionPress = (reaction: string | undefined) => {
     if (reaction && onReaction) {
       onReaction(currentMessage, reaction);
@@ -133,19 +150,31 @@ const Message = (props: MessageProps) => {
   // Content Rendering
   // =============================
 
+  /**
+   * Renders the content of a message.
+   * Handles different types of messages such as images, videos, audio, and files.
+   * Calls the renderMessageImage, renderMessageVideo, renderMessageAudio, and renderMessageText callbacks if they exist.
+   * @returns {React.ReactNode} - The rendered content of the message.
+   */
   const renderContent = () => {
     if (currentMessage.image || fileType === 'image') {
       if (props.renderMessageImage) return props.renderMessageImage(currentMessage);
 
       return (
-        <ImageCard
-          uri={currentMessage.image || currentMessage.fileUrl || ''}
-          time={timestamp}
-          isMine={!!isMine}
-          status={currentMessage.status}
-          setFullScreen={setFullScreen}
-          isFullScreen={isFullScreen}
-        />
+        <GroupUserCard
+          user={currentMessage.user}
+          isGroup={props.isGroup}
+          isMine={isMine}
+          variant="overlay">
+          <ImageCard
+            uri={currentMessage.image || currentMessage.fileUrl || ''}
+            time={timestamp}
+            isMine={!!isMine}
+            status={currentMessage.status}
+            setFullScreen={setFullScreen}
+            isFullScreen={isFullScreen}
+          />
+        </GroupUserCard>
       );
     }
 
@@ -158,17 +187,17 @@ const Message = (props: MessageProps) => {
       if (props.renderMessageVideo) {
         const videoChild = props.renderMessageVideo(currentProps);
         if (!videoChild) return null;
-        const VideoWrapper = require('./media/VideoGroupWrapper').default;
+
         return (
-          <VideoWrapper
-            isGroup={!!props.isGroup}
-            isMine={!!isMine}
-            name={!isMine ? currentMessage.user.name : undefined}
-            avatar={!isMine ? currentMessage.user.avatar : undefined}
-            time={timestamp}
-            status={currentMessage.status}>
-            {videoChild}
-          </VideoWrapper>
+          <GroupUserCard
+            user={currentMessage.user}
+            isGroup={props.isGroup}
+            isMine={isMine}
+            variant="overlay">
+            <VideoWrapper isMine={!!isMine} time={timestamp} status={currentMessage.status}>
+              {videoChild}
+            </VideoWrapper>
+          </GroupUserCard>
         );
       }
 
@@ -180,16 +209,15 @@ const Message = (props: MessageProps) => {
         const audioChild = props.renderMessageAudio(currentMessage);
         if (!audioChild) return null;
         return (
-          <View>
-            {audioChild}
-            <View style={styles.footer}>
-              <Text
-                style={[styles.time, isMine ? styles.timeMine : { color: theme.colors.timestamp }]}>
-                {timestamp}
-              </Text>
-              {isMine && <MessageStatus status={currentMessage.status} isMine={!!isMine} />}
-            </View>
-          </View>
+          <GroupUserCard
+            user={currentMessage.user}
+            isGroup={props.isGroup}
+            isMine={isMine}
+            variant="inline">
+            <VideoWrapper isAudio isMine={!!isMine} time={timestamp} status={currentMessage.status}>
+              {audioChild}
+            </VideoWrapper>
+          </GroupUserCard>
         );
       }
       return null;
@@ -197,33 +225,45 @@ const Message = (props: MessageProps) => {
 
     if (fileType === 'file') {
       return (
-        <FileCard
-          fileName={currentMessage.fileName || 'File'}
-          isMine={!!isMine}
-          time={timestamp}
-          status={currentMessage.status}
-        />
+        <GroupUserCard
+          user={currentMessage.user}
+          isGroup={props.isGroup}
+          isMine={isMine}
+          variant="inline">
+          <FileCard
+            fileName={currentMessage.fileName || 'File'}
+            isMine={!!isMine}
+            time={timestamp}
+            status={currentMessage.status}
+          />
+        </GroupUserCard>
       );
     }
 
     return (
-      <View>
-        {currentMessage.text ? (
-          props.renderMessageText ? (
-            props.renderMessageText(props)
-          ) : (
-            <Text
-              style={[
-                styles.text,
-                isMine
-                  ? { color: theme.colors.ownMessageText }
-                  : { color: theme.colors.otherMessageText },
-              ]}>
-              {currentMessage.text}
-            </Text>
-          )
-        ) : null}
-      </View>
+      <GroupUserCard
+        user={currentMessage.user}
+        isGroup={props.isGroup}
+        isMine={isMine}
+        variant="inline">
+        <View>
+          {currentMessage.text ? (
+            props.renderMessageText ? (
+              props.renderMessageText(props)
+            ) : (
+              <Text
+                style={[
+                  styles.text,
+                  isMine
+                    ? { color: theme.colors.ownMessageText }
+                    : { color: theme.colors.otherMessageText },
+                ]}>
+                {currentMessage.text}
+              </Text>
+            )
+          ) : null}
+        </View>
+      </GroupUserCard>
     );
   };
 
@@ -235,19 +275,13 @@ const Message = (props: MessageProps) => {
 
   const myReaction = currentMessage.reactions?.find((r: any) => r.userId === user.id)?.emoji;
   const otherReaction = currentMessage.reactions?.find((r: any) => r.userId !== user.id)?.emoji;
-  console.log('myReaction', myReaction);
-  console.log('otherReaction', otherReaction);
+
   // =============================
   // Render
   // =============================
   const contentEl = renderContent();
   const bubbleContent = contentEl ? (
     <Bubble isOwnMessage={!!isMine} isMedia={isMedia}>
-      {props.isGroup && !isMine && currentMessage.user.name ? (
-        <Text style={styles.groupName} numberOfLines={1}>
-          {currentMessage.user.name}
-        </Text>
-      ) : null}
       {currentMessage.replyTo && <ReplyPreview replyTo={currentMessage.replyTo} />}
       {contentEl}
       {!isMedia && (
@@ -264,16 +298,6 @@ const Message = (props: MessageProps) => {
 
   const messageView = (
     <View style={[styles.container, isMine ? styles.containerMine : styles.containerOther]}>
-      {props.isGroup && !isMine && currentMessage.user.avatar ? (
-        <Image
-          source={
-            typeof currentMessage.user.avatar === 'string'
-              ? { uri: currentMessage.user.avatar }
-              : (currentMessage.user.avatar as any)
-          }
-          style={styles.leftAvatar}
-        />
-      ) : null}
       <ReactionBubble
         reactions={reactions}
         isMine={!!isMine}

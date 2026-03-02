@@ -7,36 +7,24 @@ interface VideoGroupWrapperProps {
   children: React.ReactNode;
   isGroup?: boolean;
   isMine?: boolean;
-  name?: string;
-  avatar?: string | number;
   time?: string;
   status?: 'pending' | 'sent' | 'delivered' | 'read';
+  isAudio?: boolean;
 }
 
+/**
+ * Wraps a rendered video/audio component with group metadata header and footer.
+ * @param {VideoGroupWrapperProps} props - accepts children, isGroup, isMine, time, status, and isAudio.
+ * @returns {React.ReactElement} - a wrapped video/audio component with group metadata header and footer.
+ */
 const VideoGroupWrapper = (props: VideoGroupWrapperProps) => {
-  const { children, isGroup, isMine, name, avatar, time, status } = props;
+  const { children, isMine, time, status } = props;
   const theme = useTheme();
   return (
     <View style={styles.container}>
-      {isGroup && !isMine && (name || avatar) ? (
-        <View style={styles.nameRow}>
-          {avatar ? (
-            <Image
-              source={typeof avatar === 'string' ? { uri: avatar } : (avatar as any)}
-              style={styles.avatar}
-              resizeMode="cover"
-            />
-          ) : null}
-          {name ? (
-            <Text style={styles.nameText} numberOfLines={1}>
-              {name}
-            </Text>
-          ) : null}
-        </View>
-      ) : null}
       {children}
       {time ? (
-        <View pointerEvents="none" style={styles.infoRow}>
+        <View pointerEvents="none" style={[styles.infoRow, props.isAudio ? styles.audio : null]}>
           <Text
             style={[
               styles.timeText,
@@ -55,30 +43,6 @@ const styles = StyleSheet.create({
   container: {
     position: 'relative',
   },
-  nameRow: {
-    position: 'absolute',
-    top: defaultTheme.spacing.sm,
-    left: defaultTheme.spacing.sm,
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: defaultTheme.colors.overlayBlack50,
-    borderRadius: 12,
-    paddingHorizontal: defaultTheme.spacing.sm,
-    paddingVertical: defaultTheme.spacing.xs / 2,
-  },
-  avatar: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: defaultTheme.colors.softGray,
-    marginRight: defaultTheme.spacing.md,
-  },
-  nameText: {
-    color: defaultTheme.colors.white,
-    fontSize: defaultTheme.typography.body2,
-    fontWeight: '600',
-    maxWidth: 200,
-  },
   infoRow: {
     position: 'absolute',
     right: defaultTheme.spacing.sm,
@@ -90,6 +54,12 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: defaultTheme.spacing.sm,
     paddingVertical: defaultTheme.spacing.xs / 2,
+  },
+  audio: {
+    paddingHorizontal: 0,
+    paddingVertical: 0,
+    backgroundColor: 'transparent',
+    bottom: defaultTheme.spacing.sm - 3,
   },
   timeText: {
     fontSize: defaultTheme.typography.caption,

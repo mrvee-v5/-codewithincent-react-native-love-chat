@@ -11,23 +11,28 @@ const uploadOptions = [
   { id: '3', label: 'Document', icon: FileIcon },
 ];
 
-const UploadFooter = ({
-  onActionPress,
-}: {
-  onActionPress: (type: string) => void;
-}) => {
+/**
+ * A component that renders a footer with three upload options: Image, Video, Document.
+ * @param {function} onActionPress - A function that is called when an upload option is pressed.
+ * @returns {JSX.Element} - A JSX element representing the footer.
+ */
+const UploadFooter = ({ onActionPress }: { onActionPress: (type: string) => void }) => {
   const inset = useSafeAreaInsets();
   const theme = useTheme();
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.verySoftGray }, { paddingBottom: inset.bottom + 20 }]}>
-      {uploadOptions.map(item => {
+    <View
+      style={[
+        styles.container,
+        { backgroundColor: theme.colors.verySoftGray },
+        { paddingBottom: inset.bottom + 20 },
+      ]}>
+      {uploadOptions.map((item) => {
         const Icon = item.icon;
         return (
           <TouchableOpacity
             key={item.id}
             style={styles.iconBox}
-            onPress={() => onActionPress(item.label)}
-          >
+            onPress={() => onActionPress(item.label)}>
             <Icon size={22} color={theme.colors.darkRed} />
           </TouchableOpacity>
         );

@@ -50,6 +50,14 @@ const DoubleCheckIcon = ({ color }: { color: string }) => (
   </Svg>
 );
 
+/**
+ * Renders a message status icon.
+ *
+ * @param {string} status - The status of the message ('pending', 'sent', 'delivered', or 'read').
+ * @param {boolean} isMine - Whether the message is from the current user.
+ *
+ * @returns A JSX element representing the message status icon.
+ */
 const MessageStatus = ({ status, isMine }: Props) => {
   const theme = useTheme();
   if (!isMine) return null;

@@ -20,6 +20,17 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 const ImageComponent = Image;
 
+/**
+ * ImageCard component
+ *
+ * @param {string} uri - The image url
+ * @param {number} maxWidth - The maximum width of the image
+ * @param {string} time - The time when the image is sent
+ * @param {boolean} isFullScreen - Whether the image is full screen
+ * @param {function} setFullScreen - Function to set the image as full screen
+ * @param {boolean} isMine - Whether the image is sent by the user
+ * @param {string} status - The status of the image ('pending', 'sent', 'delivered', 'read')
+ */
 export default function ImageCard({
   uri,
   maxWidth,

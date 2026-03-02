@@ -1,5 +1,4 @@
-import React from 'react';
-import { View, StyleSheet, Text, Image } from 'react-native';
+import { View, StyleSheet, Text } from 'react-native';
 import { appSize } from '../../utils';
 import { defaultTheme, useTheme } from '../../utils/theme';
 import MessageStatus from '../MessageStatus';
@@ -13,12 +12,17 @@ interface FileCardProps {
   status?: 'pending' | 'sent' | 'delivered' | 'read';
 }
 
+/**
+ * A reusable wrapper that displays a file message in a consistent layout around arbitrary chat content.
+ * Props:
+ * fileName: string - The name of the file to be displayed.
+ * isMine?: boolean - Whether the file is from the current user or not. Defaults to false.
+ * time?: string - The timestamp to be displayed in the footer. Optional.
+ * status?: 'pending' | 'sent' | 'delivered' | 'read' - The status of the file to be displayed in the footer. Optional.
+ */
+/*******  e93b6b15-23c4-4a42-929d-26f1cb3a7d6d  *******/
 export default function FileCard({ fileName, isMine = false, time, status }: FileCardProps) {
   const theme = useTheme();
-
-  // WhatsApp-style colors
-  // Sent: Lighter green bubble, file card is slightly darker green/transparent
-  // Received: White bubble, file card is light gray
 
   const cardBackgroundColor = isMine
     ? theme.colors.surfaceBubbleOutgoing
@@ -27,6 +31,12 @@ export default function FileCard({ fileName, isMine = false, time, status }: Fil
   const subTextColor = isMine ? theme.colors.textTimestampMine : theme.colors.mediumGray;
   const iconColor = isMine ? theme.colors.iconOnBubbleOutgoing : theme.colors.iconAccentDanger;
 
+  /**
+   * Returns the file extension from the given file name.
+   * If no extension is found, returns 'FILE'.
+   * @param {string} name - The file name.
+   * @returns {string} The file extension in uppercase.
+   */
   const getExtension = (name: string) => {
     return name.split('.').pop()?.toUpperCase() || 'FILE';
   };
