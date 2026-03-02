@@ -4,25 +4,16 @@ import { render } from '@testing-library/react-native';
 import MessageList from '../MessageList';
 import { IMessage } from '../../types';
 
-// Mock FlashList to expose passed props
-const capturedProps = { current: null as any };
-
-jest.mock('@shopify/flash-list', () => {
-  const React = require('react');
-  const { View } = require('react-native');
-  return {
-    FlashList: React.forwardRef((props: any, ref: any) => {
-      capturedProps.current = props;
-      return <View testID="flash-list" {...props} />;
-    }),
-  };
-});
-
 describe('MessageList', () => {
   const mockUser = { id: 1, name: 'User' };
   const mockMessages: IMessage[] = [
     { id: 101, text: 'Hello', createdAt: new Date(), user: mockUser },
-    { id: 100, text: 'World', createdAt: new Date(Date.now() - 1000), user: { id: 2, name: 'Other' } },
+    {
+      id: 100,
+      text: 'World',
+      createdAt: new Date(Date.now() - 1000),
+      user: { id: 2, name: 'Other' },
+    },
   ];
   const mockOnSend = jest.fn();
 
@@ -30,10 +21,8 @@ describe('MessageList', () => {
     const { getByTestId } = render(
       <MessageList messages={mockMessages} user={mockUser} onSend={mockOnSend} />
     );
-    const list = getByTestId('flash-list');
+    const list = getByTestId('message-list');
     expect(list.props.inverted).toBe(true);
-    expect(list.props.maintainVisibleContentPosition?.startRenderingFromBottom).toBe(true);
-    expect(list.props.maintainVisibleContentPosition?.minIndexForVisible).toBe(0);
   });
 
   it('renders load earlier footer when enabled', () => {
@@ -46,13 +35,16 @@ describe('MessageList', () => {
         onLoadEarlier={jest.fn()}
       />
     );
-    const list = getByTestId('flash-list');
+    const list = getByTestId('message-list');
     expect(list.props.ListFooterComponent).toBeDefined();
   });
 
   it('uses keyExtractor to stringify ids', () => {
-    render(<MessageList messages={mockMessages} user={mockUser} onSend={mockOnSend} />);
-    const keyExtractor = capturedProps.current?.keyExtractor;
+    const { getByTestId } = render(
+      <MessageList messages={mockMessages} user={mockUser} onSend={mockOnSend} />
+    );
+    const list = getByTestId('message-list');
+    const keyExtractor = list.props.keyExtractor;
     expect(typeof keyExtractor).toBe('function');
     const k = keyExtractor({ id: 123 } as any);
     expect(k).toBe('123');

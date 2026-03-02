@@ -1,6 +1,12 @@
 import React, { useCallback, useMemo, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { FlashList } from '@shopify/flash-list';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ActivityIndicator,
+  FlatList,
+} from 'react-native';
 import { IMessage, ChatProps } from '../types';
 import Message from './Message';
 import { isSameDay } from '../utils';
@@ -95,8 +101,9 @@ const MessageList = (props: MessageListProps) => {
   };
 
   return (
-    <FlashList
+    <FlatList
       ref={listRef}
+      testID="message-list"
       data={listData}
       renderItem={renderItem}
       keyExtractor={keyExtractor}
@@ -104,11 +111,6 @@ const MessageList = (props: MessageListProps) => {
       contentContainerStyle={[styles.listContent, props.contentContainerStyle]}
       ListFooterComponent={renderHeader}
       keyboardShouldPersistTaps={props.keyboardShouldPersistTaps}
-      maintainVisibleContentPosition={{
-        startRenderingFromBottom: true,
-        autoscrollToBottomThreshold: 0,
-        minIndexForVisible: 0,
-      }}
       onEndReached={loadEarlier ? onLoadEarlier : undefined}
       onEndReachedThreshold={0.1}
       estimatedItemSize={72}

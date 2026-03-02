@@ -9,7 +9,7 @@ A customizable chat UI component for React Native with replies, reactions, media
 - Image, video, audio, and generic file attachments
 - Load earlier messages header
 - Theming via theme prop override
-- FlashList-backed message rendering
+- FlatList-based, virtualized message rendering
 - TypeScript types included
 
 ## Installation
@@ -30,7 +30,6 @@ Peer dependencies (install as needed):
 - react-native-reanimated
 - react-native-safe-area-context
 - react-native-root-siblings
-- @shopify/flash-list
 - react-native-svg
 - Optional blur providers: @react-native-community/blur or expo-blur
 

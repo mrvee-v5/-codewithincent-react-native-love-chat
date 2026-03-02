@@ -6,8 +6,8 @@ This document explains the library’s purpose, architecture, public API, and us
 
 - Purpose: Provide a production-ready chat UI for React Native with messages, replies, reactions, media, and theming.
 - Architecture:
-  - Chat orchestrates MessageList and InputToolbar, wrapped in ThemeProvider.
-  - MessageList renders items using FlashList, anchors to the bottom, and groups by date.
+-  - Chat orchestrates MessageList and InputToolbar, wrapped in ThemeProvider.
+-  - MessageList renders items using FlatList, anchors to the bottom, and groups by date.
   - Message renders text/media and integrates ReactionBubble and Bubble.
   - Theme utilities expose defaultTheme, ThemeProvider, useTheme.
   - Utils include appSize, Logger, isSameUser, isSameDay.
@@ -158,7 +158,7 @@ Return:
 
 Errors:
 
-- Missing peer deps (e.g., react-native-root-siblings, flash-list) cause runtime errors when related features mount.
+- Missing peer deps (e.g., react-native-root-siblings) cause runtime errors when related features mount.
 - Invalid message shapes may render empty bubbles or no media.
 
 Example (advanced: media and reactions):
@@ -250,9 +250,9 @@ function Screen() {
 - Export: `MessageList`.
 - Signature: `(props: ChatProps & { contentContainerStyle?: any; inverted?: boolean }) => ReactElement`.
 - Behavior:
-  - Uses FlashList; maintains visible content position; renders date headers when day changes.
-  - Expects messages as is (no reversal) and derives previous/next for item rendering.
-  - Supports `renderMessage` override for complete control.
+-  - Uses `FlatList`; anchors to the bottom; renders date headers when the day changes.
+-  - Expects messages as is (no reversal) and derives previous/next for item rendering.
+-  - Supports `renderMessage` override for complete control.
 
 Edge Case:
 
